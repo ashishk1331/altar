@@ -1,7 +1,7 @@
 import { Image } from "react-native";
 
 type ImageContainerProps = {
-  src?: string;
+  src?: string | null;
   width: number;
 };
 

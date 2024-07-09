@@ -30,5 +30,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.light.grayed + "40",
     fontSize: 17,
+    lineHeight: 24,
   },
 });

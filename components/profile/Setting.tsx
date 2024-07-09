@@ -10,31 +10,37 @@ import Separator from "../ui/Separator";
 
 // Constants
 import { Colors } from "@/constants/Colors";
-
-const items = [
-  {
-    label: "Edit Profile",
-    href: "/profile/edit-profile",
-  },
-  {
-    label: "Posts",
-    href: "/profile/posts",
-  },
-  {
-    label: "Drafts",
-    href: "/profile/drafts",
-  },
-  {
-    label: "Bookmarks",
-    href: "/profile/bookmarks",
-  },
-  {
-    label: "Log Out",
-    href: "/logout",
-  },
-];
+import { useSession } from "@/wrapper/SessionWrapper";
 
 export default function Setting() {
+  const { session } = useSession();
+  const items = [
+    {
+      label: "Visit Profile",
+      href: "/user/" + session?.user.id,
+    },
+    {
+      label: "Edit Profile",
+      href: "/profile/edit-profile",
+    },
+    {
+      label: "Posts",
+      href: "/profile/posts",
+    },
+    // {
+    //   label: "Drafts",
+    //   href: "/profile/drafts",
+    // },
+    {
+      label: "Bookmarks",
+      href: "/profile/bookmarks",
+    },
+    {
+      label: "Log Out",
+      href: "/logout",
+    },
+  ];
+
   function goTo(href: string) {
     router.push(href);
   }

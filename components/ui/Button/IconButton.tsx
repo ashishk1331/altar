@@ -2,7 +2,7 @@ import { PressableProps, StyleSheet, TouchableOpacity } from "react-native";
 
 type ButtonProps = {
   children: React.ReactNode;
-  onPress(): void;
+  onPress?: () => void;
 } & PressableProps;
 
 export function IconButton({ children, onPress }: ButtonProps) {

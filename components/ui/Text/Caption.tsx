@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   bold: {
-    fontWeight: "semibold",
+    fontWeight: "bold",
   },
   italic: {
     fontStyle: "italic",

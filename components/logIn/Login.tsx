@@ -1,6 +1,11 @@
 // Library
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { router } from "expo-router";
 
 // Components
@@ -10,6 +15,9 @@ import Button from "../ui/Button";
 
 // Constants
 import { Colors } from "@/constants/Colors";
+import { isValidEmail } from "@/util/validation";
+import { loginUser } from "@/util/auth";
+import ErrorBox from "../ui/ErrorBox";
 
 type LoginProps = {
   setLoginPage: (newValue: boolean) => void;
@@ -18,15 +26,37 @@ type LoginProps = {
 export default function Login({ setLoginPage }: LoginProps) {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
-  function handleSubmit() {
-    // implement logic
+  async function handleSubmit() {
+    setIsLoading(true);
+    setErrorMessage(null);
+    const { ok, message } = isValidEmail(email);
+    if (!ok) {
+      if (message) {
+        setErrorMessage(message);
+      }
+      setIsLoading(false);
+      return;
+    }
+
+    const { ok: isValidUser, ...rest } = await loginUser(email, password);
+
+    if (!isValidUser) {
+      if (rest.message) {
+        setErrorMessage(rest.message);
+      }
+      setIsLoading(false);
+      return;
+    }
 
     router.replace("/home");
   }
 
   return (
     <Flex direction="column" w={264} gap={24} items="center">
+      {errorMessage && <ErrorBox message={errorMessage} />}
       <InputBox value={email} setValue={setEmail} placeholder="Email" />
       <InputBox
         value={password}
@@ -34,9 +64,12 @@ export default function Login({ setLoginPage }: LoginProps) {
         placeholder="Password"
       />
       <Button fill onPress={handleSubmit}>
-        Log In
+        {isLoading ? <ActivityIndicator /> : "Log In"}
       </Button>
-      <TouchableOpacity onPress={() => setLoginPage(false)}>
+      <TouchableOpacity
+        onPress={() => setLoginPage(false)}
+        disabled={isLoading}
+      >
         <Text style={styles.underline}>or Sign Up here</Text>
       </TouchableOpacity>
     </Flex>

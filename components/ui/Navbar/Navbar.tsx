@@ -10,20 +10,24 @@ import { Headline } from "../Text";
 
 type NavbarProps = {
   title: string;
+  right?: React.ReactNode;
 };
 
-export default function Navbar({ title }: NavbarProps) {
+export default function Navbar({ title, right }: NavbarProps) {
   function goBack() {
     router.back();
   }
 
   return (
     <View style={styles.navbar}>
-      <Flex items="center" w="100%" gap={24} justify="flex-start">
-        <IconButton onPress={goBack}>
-          <ArrowLeft color="black" height={24} width={24} />
-        </IconButton>
-        <Headline>{title}</Headline>
+      <Flex w="100%" justify="space-between" items="center">
+        <Flex items="center" gap={24} justify="flex-start">
+          <IconButton onPress={goBack}>
+            <ArrowLeft color="black" height={24} width={24} />
+          </IconButton>
+          <Headline>{title}</Headline>
+        </Flex>
+        {right}
       </Flex>
     </View>
   );
@@ -31,7 +35,6 @@ export default function Navbar({ title }: NavbarProps) {
 
 const styles = StyleSheet.create({
   navbar: {
-    paddingHorizontal: 6,
-    paddingVertical: 16,
+    padding: 6,
   },
 });

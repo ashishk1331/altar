@@ -11,5 +11,6 @@ export const Colors = {
     lightGray: "#F8F8F8",
     active: "#5689FF",
     wrong: "#FF2E1F",
+    success: "#00cca3",
   },
 };

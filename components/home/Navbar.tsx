@@ -1,24 +1,39 @@
+// Library
 import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { router } from "expo-router";
+import { Search } from "iconoir-react-native";
+
+// Components
 import Flex from "../ui/Flex";
 import { Headline } from "../ui/Text";
 import { IconButton } from "../ui/Button";
-import { Search } from "iconoir-react-native";
-import ImageContainer from "../ui/ImageContainer";
-import { router } from "expo-router";
-import { Colors } from "@/constants/Colors";
+import Avatar from "../ui/Avatar";
 
-export default function Navbar() {
+// Constants
+import { Colors } from "@/constants/Colors";
+import useFetchUser from "@/hooks/useFetchUser";
+
+type NavbarProps = {
+  userId: string;
+};
+
+export default function Navbar({ userId }: NavbarProps) {
+  const { data, isPending } = useFetchUser(userId);
   function goToProfile() {
     router.push("/profile");
   }
+  function goToSearch() {
+    router.push("/search");
+  }
+
   return (
     <View style={styles.navbar}>
       <Flex items="center" justify="space-between" w="100%">
         <TouchableOpacity onPress={goToProfile}>
-          <ImageContainer width={42} />
+          {!isPending && <Avatar width={42} name={data?.data?.name || ""} />}
         </TouchableOpacity>
         <Headline>Altar</Headline>
-        <IconButton onPress={() => {}}>
+        <IconButton>
           <Search color={Colors.light.text} height={24} width={24} />
         </IconButton>
       </Flex>

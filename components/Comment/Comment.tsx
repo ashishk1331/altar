@@ -1,31 +1,51 @@
-import { Colors } from "@/constants/Colors";
+// Library
+import { MoreHoriz } from "iconoir-react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+
+// Components
 import Flex from "../ui/Flex";
 import ImageContainer from "../ui/ImageContainer";
 import { Footnote, Paragraph } from "../ui/Text";
 import { IconButton } from "../ui/Button";
-import { MoreHoriz } from "iconoir-react-native";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { router } from "expo-router";
+
+// Constants
+import { Colors } from "@/constants/Colors";
 import { Icon } from "@/constants/Icon";
+import { jumpToProfile } from "@/util/jumpTo";
+import { CommentType } from "@/hooks/useFetchCommentsForPost";
+import { formatDistanceToNow } from "date-fns";
+import useFetchUser from "@/hooks/useFetchUser";
+import { emailToName } from "@/util/handy";
+import Avatar from "../ui/Avatar";
 
 type PostProps = {
+  comment: CommentType;
   isEditable?: boolean;
 };
 
-export default function Comment({ isEditable }: PostProps) {
-  function goToProfile(id: string) {
-    router.push(`/profile/${id}`);
-  }
+export default function Comment({ comment, isEditable }: PostProps) {
+  const { data, isPending } = useFetchUser(comment.author_id || "");
 
   return (
     <View style={styles.container}>
       <Flex direction="column" gap={10} p={10} w="100%">
-        <TouchableOpacity onPress={() => goToProfile("abc")}>
+        <TouchableOpacity
+          onPress={() => jumpToProfile(comment.author_id || "")}
+        >
           <Flex gap={10} items="center" justify="space-between" w="100%">
             <Flex gap={10} items="center">
-              <ImageContainer width={28} />
-              <Footnote>Boring Mule</Footnote>
-              <Footnote color={Colors.light.grayed}>4m</Footnote>
+              <Avatar
+                width={28}
+                name={
+                  !isPending && data?.data && emailToName(data.data.name || "")
+                }
+              />
+              <Footnote>
+                {!isPending && data?.data && emailToName(data.data.name || "")}
+              </Footnote>
+              <Footnote color={Colors.light.grayed}>
+                {formatDistanceToNow(new Date(comment.created_at))}
+              </Footnote>
             </Flex>
             {isEditable && (
               <IconButton>
@@ -35,10 +55,7 @@ export default function Comment({ isEditable }: PostProps) {
           </Flex>
         </TouchableOpacity>
         <View style={styles.content}>
-          <Paragraph>
-            I loved the poem. Also, when is your next poem coming out. Waiting
-            eagerly for it.
-          </Paragraph>
+          <Paragraph>{comment.message}</Paragraph>
         </View>
       </Flex>
     </View>

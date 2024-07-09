@@ -1,23 +1,57 @@
-import { StyleSheet, View } from "react-native";
+// Library
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { router } from "expo-router";
 
+// Components
 import Flex from "../ui/Flex";
-import ImageContainer from "../ui/ImageContainer";
 import { Caption, Paragraph } from "../ui/Text";
+import useFetchUser from "@/hooks/useFetchUser";
+import { emailToName } from "@/util/handy";
+import Avatar from "../ui/Avatar";
 
-export default function ProfileHeader() {
+type ProfileHeaderProps = {
+  isAtProfilePage?: boolean;
+  id?: string;
+};
+
+export default function ProfileHeader({
+  isAtProfilePage = false,
+  id,
+}: ProfileHeaderProps) {
+  const { isPending, data } = useFetchUser(id ?? "");
+  function jumpToFollowers(isFollowerList: boolean) {
+    router.push(`/profile/user-list?isFollowerList=${isFollowerList}`);
+  }
+
+  if (isPending && !data) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       <Flex gap={16}>
-        <ImageContainer width={120} />
-        <Flex direction="column">
-          <Paragraph>Ashish Khare</Paragraph>
-          <Caption>@ashuzon</Caption>
-          <Caption>Let's run away to Milan!</Caption>
+        <Avatar width={120} name={emailToName(data?.data?.name || "Maya")} />
+        <Flex direction="column" justify="space-between">
+          <Paragraph>{emailToName(data?.data?.name || "Maya")}</Paragraph>
+          {data?.data && <Caption>{data.data.bio}</Caption>}
 
           <View style={styles.bar}>
             <Flex justify="space-between" gap={24}>
-              <Caption>134 followers</Caption>
-              <Caption>32 following</Caption>
+              {isAtProfilePage ? (
+                <TouchableOpacity onPress={() => jumpToFollowers(true)}>
+                  <Caption>{data?.data?.followers} followers</Caption>
+                </TouchableOpacity>
+              ) : (
+                <Caption>{data?.data?.followers} followers</Caption>
+              )}
+
+              {isAtProfilePage ? (
+                <TouchableOpacity onPress={() => jumpToFollowers(false)}>
+                  <Caption>{data?.data?.following} following</Caption>
+                </TouchableOpacity>
+              ) : (
+                <Caption>{data?.data?.following} following</Caption>
+              )}
             </Flex>
           </View>
         </Flex>
@@ -31,6 +65,6 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   bar: {
-    marginTop: 24,
+    marginTop: 10,
   },
 });

@@ -22,3 +22,6 @@ expo-env.d.ts
 # Environment Files
 .env
 .env.local
+
+# Extra Files
+commands.md

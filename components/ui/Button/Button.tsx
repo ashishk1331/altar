@@ -9,7 +9,7 @@ import {
 type ButtonProps = {
   children: React.ReactNode;
   fill?: boolean;
-  onPress(): void;
+  onPress?: () => void;
 } & PressableProps;
 
 export default function Button({ children, fill, onPress }: ButtonProps) {
