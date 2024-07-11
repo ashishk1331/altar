@@ -4,7 +4,7 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 // Components
 import Flex from "../ui/Flex";
-import ImageContainer from "../ui/ImageContainer";
+// import ImageContainer from "../ui/ImageContainer";
 import { Footnote, Paragraph } from "../ui/Text";
 import { IconButton } from "../ui/Button";
 
@@ -37,11 +37,15 @@ export default function Comment({ comment, isEditable }: PostProps) {
               <Avatar
                 width={28}
                 name={
-                  !isPending && data?.data && emailToName(data.data.name || "")
+                  !isPending && data?.data
+                    ? emailToName(data.data.name || "")
+                    : ""
                 }
               />
               <Footnote>
-                {!isPending && data?.data && emailToName(data.data.name || "")}
+                {!isPending && data?.data
+                  ? emailToName(data.data.name || "")
+                  : ""}
               </Footnote>
               <Footnote color={Colors.light.grayed}>
                 {formatDistanceToNow(new Date(comment.created_at))}

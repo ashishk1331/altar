@@ -29,7 +29,6 @@ import { formatDistanceToNow } from "date-fns";
 import useFetchCommentsForPost from "@/hooks/useFetchCommentsForPost";
 import { useSession } from "@/wrapper/SessionWrapper";
 import useUpdateBookmark from "@/hooks/useUpdateBookmark";
-import React from "react";
 import useFetchBookmarks from "@/hooks/useFetchBookmarks";
 
 export default function Poem() {
@@ -47,7 +46,7 @@ export default function Poem() {
     }
   }
 
-  if (isPending && !data) {
+  if ((isPending || isFetchingBoomarks) && !data) {
     return <ActivityIndicator />;
   }
 

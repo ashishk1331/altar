@@ -18,7 +18,7 @@ import { jumpToHome } from "@/util/jumpTo";
 import { useSession } from "@/wrapper/SessionWrapper";
 
 export default function Page() {
-  const { session, resetSession } = useSession();
+  const { session } = useSession();
   const userId = session?.user.id ?? "";
 
   const queryClient = useQueryClient();
@@ -34,7 +34,6 @@ export default function Page() {
         }
       }
       queryClient.invalidateQueries({ queryKey: ["author", userId] });
-      resetSession();
       router.replace("/");
     }
 

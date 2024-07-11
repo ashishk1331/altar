@@ -90,3 +90,20 @@ export async function getSession() {
     session,
   };
 }
+
+export async function resetPassword(newPassword: string) {
+  const { data, error } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (error) {
+    return {
+      ok: false,
+      message: error.message,
+    };
+  }
+  return {
+    ok: true,
+    data,
+  };
+}

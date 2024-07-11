@@ -4,182 +4,182 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
 
 export type Database = {
   public: {
     Tables: {
       authors: {
         Row: {
-          bio: string | null
-          created_at: string
-          followers: number | null
-          following: number | null
-          id: string
-          name: string | null
-        }
+          bio: string | null;
+          created_at: string;
+          followers: number | null;
+          following: number | null;
+          id: string;
+          name: string | null;
+        };
         Insert: {
-          bio?: string | null
-          created_at?: string
-          followers?: number | null
-          following?: number | null
-          id?: string
-          name?: string | null
-        }
+          bio?: string | null;
+          created_at?: string;
+          followers?: number | null;
+          following?: number | null;
+          id?: string;
+          name?: string | null;
+        };
         Update: {
-          bio?: string | null
-          created_at?: string
-          followers?: number | null
-          following?: number | null
-          id?: string
-          name?: string | null
-        }
+          bio?: string | null;
+          created_at?: string;
+          followers?: number | null;
+          following?: number | null;
+          id?: string;
+          name?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "authors_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
+            foreignKeyName: "authors_id_fkey";
+            columns: ["id"];
+            isOneToOne: true;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       bookmarks: {
         Row: {
-          author_id: string | null
-          created_at: string
-          id: string
-          post_id: string | null
-        }
+          author_id: string | null;
+          created_at: string;
+          id: string;
+          post_id: string | null;
+        };
         Insert: {
-          author_id?: string | null
-          created_at?: string
-          id?: string
-          post_id?: string | null
-        }
+          author_id?: string | null;
+          created_at?: string;
+          id?: string;
+          post_id?: string | null;
+        };
         Update: {
-          author_id?: string | null
-          created_at?: string
-          id?: string
-          post_id?: string | null
-        }
+          author_id?: string | null;
+          created_at?: string;
+          id?: string;
+          post_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "bookmarks_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "authors"
-            referencedColumns: ["id"]
+            foreignKeyName: "bookmarks_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "authors";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "bookmarks_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts"
-            referencedColumns: ["id"]
+            foreignKeyName: "bookmarks_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "posts";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       comments: {
         Row: {
-          author_id: string | null
-          created_at: string
-          id: string
-          message: string | null
-          post_id: string | null
-        }
+          author_id: string | null;
+          created_at: string;
+          id: string;
+          message: string | null;
+          post_id: string | null;
+        };
         Insert: {
-          author_id?: string | null
-          created_at?: string
-          id?: string
-          message?: string | null
-          post_id?: string | null
-        }
+          author_id?: string | null;
+          created_at?: string;
+          id?: string;
+          message?: string | null;
+          post_id?: string | null;
+        };
         Update: {
-          author_id?: string | null
-          created_at?: string
-          id?: string
-          message?: string | null
-          post_id?: string | null
-        }
+          author_id?: string | null;
+          created_at?: string;
+          id?: string;
+          message?: string | null;
+          post_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "comments_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "authors"
-            referencedColumns: ["id"]
+            foreignKeyName: "comments_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "authors";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "comments_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts"
-            referencedColumns: ["id"]
+            foreignKeyName: "comments_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "posts";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       posts: {
         Row: {
-          author_id: string | null
-          author_name: string | null
-          comment_count: number | null
-          content: string | null
-          created_at: string
-          id: string
-          is_draft: boolean | null
-          like_count: number | null
-          title: string | null
-        }
+          author_id: string | null;
+          author_name: string | null;
+          comment_count: number | null;
+          content: string | null;
+          created_at: string;
+          id: string;
+          is_draft: boolean | null;
+          like_count: number | null;
+          title: string | null;
+        };
         Insert: {
-          author_id?: string | null
-          author_name?: string | null
-          comment_count?: number | null
-          content?: string | null
-          created_at?: string
-          id?: string
-          is_draft?: boolean | null
-          like_count?: number | null
-          title?: string | null
-        }
+          author_id?: string | null;
+          author_name?: string | null;
+          comment_count?: number | null;
+          content?: string | null;
+          created_at?: string;
+          id?: string;
+          is_draft?: boolean | null;
+          like_count?: number | null;
+          title?: string | null;
+        };
         Update: {
-          author_id?: string | null
-          author_name?: string | null
-          comment_count?: number | null
-          content?: string | null
-          created_at?: string
-          id?: string
-          is_draft?: boolean | null
-          like_count?: number | null
-          title?: string | null
-        }
+          author_id?: string | null;
+          author_name?: string | null;
+          comment_count?: number | null;
+          content?: string | null;
+          created_at?: string;
+          id?: string;
+          is_draft?: boolean | null;
+          like_count?: number | null;
+          title?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "posts_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "authors"
-            referencedColumns: ["id"]
+            foreignKeyName: "posts_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "authors";
+            referencedColumns: ["id"];
           },
-        ]
-      }
-    }
+        ];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Enums: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type PublicSchema = Database[Extract<keyof Database, "public">];
 
 export type Tables<
   PublicTableNameOrOptions extends
@@ -192,7 +192,7 @@ export type Tables<
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
@@ -200,11 +200,11 @@ export type Tables<
         PublicSchema["Views"])
     ? (PublicSchema["Tables"] &
         PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-        Row: infer R
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
@@ -215,17 +215,17 @@ export type TablesInsert<
     : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
     ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Insert: infer I
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
@@ -236,17 +236,17 @@ export type TablesUpdate<
     : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
     ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Update: infer U
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   PublicEnumNameOrOptions extends
@@ -259,4 +259,4 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
-    : never
+    : never;

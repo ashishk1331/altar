@@ -14,6 +14,8 @@ import EmptyFeed from "@/components/home/EmptyFeed";
 import useFetchPosts from "@/hooks/useFetchPosts";
 import useFetchBookmarks from "@/hooks/useFetchBookmarks";
 import { useSession } from "@/wrapper/SessionWrapper";
+import Button from "@/components/ui/Button";
+import Flex from "@/components/ui/Flex";
 
 export default function Home() {
   const { session } = useSession();
@@ -46,6 +48,13 @@ export default function Home() {
               <Separator />
             </>
           )}
+          ListFooterComponent={
+            <View style={{ paddingBottom: 64 }}>
+              <Flex>
+                <Button>Load more</Button>
+              </Flex>
+            </View>
+          }
           keyExtractor={(item) => item.id}
           style={styles.list}
           refreshControl={

@@ -1,6 +1,6 @@
 // Library
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { router } from "expo-router";
+// import { router } from "expo-router";
 import { Search } from "iconoir-react-native";
 
 // Components
@@ -12,6 +12,7 @@ import Avatar from "../ui/Avatar";
 // Constants
 import { Colors } from "@/constants/Colors";
 import useFetchUser from "@/hooks/useFetchUser";
+import { router } from "expo-router";
 
 type NavbarProps = {
   userId: string;
@@ -22,9 +23,9 @@ export default function Navbar({ userId }: NavbarProps) {
   function goToProfile() {
     router.push("/profile");
   }
-  function goToSearch() {
-    router.push("/search");
-  }
+  // function goToSearch() {
+  //   router.push("/search");
+  // }
 
   return (
     <View style={styles.navbar}>

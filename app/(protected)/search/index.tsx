@@ -9,11 +9,11 @@ import Post from "@/components/Post";
 import Separator from "@/components/ui/Separator";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import Flex from "@/components/ui/Flex";
-import Container from "@/components/ui/Container";
+// import Container from "@/components/ui/Container";
 import { Paragraph } from "@/components/ui/Text";
 
 // Constants
-import { Colors } from "@/constants/Colors";
+// import { Colors } from "@/constants/Colors";
 import { jumpToProfile } from "@/util/jumpTo";
 
 export default function AddPoem() {
@@ -45,13 +45,13 @@ export default function AddPoem() {
     );
   }
 
-  function EmptyCard() {
-    return (
-      <Container>
-        <Paragraph color={Colors.light.grayed}>Nothing Found</Paragraph>
-      </Container>
-    );
-  }
+  // function EmptyCard() {
+  //   return (
+  //     <Container>
+  //       <Paragraph color={Colors.light.grayed}>Nothing Found</Paragraph>
+  //     </Container>
+  //   );
+  // }
 
   return (
     <View style={[styles.container, styles.outer]}>
