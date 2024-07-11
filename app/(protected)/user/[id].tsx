@@ -1,5 +1,6 @@
 // Library
 import { StyleSheet, View, FlatList, RefreshControl } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 
 // Components
 import Post from "@/components/Post";
@@ -9,17 +10,22 @@ import Flex from "@/components/ui/Flex";
 import Navbar from "@/components/ui/Navbar";
 import Separator from "@/components/ui/Separator";
 import { Paragraph } from "@/components/ui/Text";
-import { useLocalSearchParams } from "expo-router";
-import useFetchPostsByUser from "@/hooks/useFetchPostsByUser";
 import EmptyFeed from "@/components/home/EmptyFeed";
+
+// Constants
+import useFetchPostsByUser from "@/hooks/useFetchPostsByUser";
 import { useSession } from "@/wrapper/SessionWrapper";
 import useFetchBookmarks from "@/hooks/useFetchBookmarks";
+
+type QueryParams = {
+  id: string;
+};
 
 export default function Profile() {
   const { session } = useSession();
   const userId = session?.user.id ?? "";
 
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams() as QueryParams;
   const { data, isPending, isRefetching, refetch } = useFetchPostsByUser(id);
   const { data: bookmarks } = useFetchBookmarks(id);
 

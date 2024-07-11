@@ -39,6 +39,7 @@ export default function Post({
   const { session } = useSession();
   const author_id = session?.user.id ?? "";
   const { mutate, isPending: isMutating } = useUpdateBookmark(author_id);
+
   let content = post.content;
   if (content && content.length > 128) {
     content = content.substring(0, 125) + "...";

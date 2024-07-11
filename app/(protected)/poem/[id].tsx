@@ -8,6 +8,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Bookmark, ChatBubbleEmpty, Heart } from "iconoir-react-native";
+import { useLocalSearchParams } from "expo-router";
+import { formatDistanceToNow } from "date-fns";
 
 // Components
 import Navbar from "@/components/ui/Navbar";
@@ -23,21 +25,25 @@ import CommentBox from "@/components/Comment/CommentBox";
 import { Icon } from "@/constants/Icon";
 import { Colors } from "@/constants/Colors";
 import { jumpToProfile } from "@/util/jumpTo";
-import useFetchPosts from "@/hooks/useFetchPosts";
-import { useLocalSearchParams } from "expo-router";
-import { formatDistanceToNow } from "date-fns";
+import { PostType } from "@/hooks/useFetchPosts";
 import useFetchCommentsForPost from "@/hooks/useFetchCommentsForPost";
 import { useSession } from "@/wrapper/SessionWrapper";
 import useUpdateBookmark from "@/hooks/useUpdateBookmark";
 import useFetchBookmarks from "@/hooks/useFetchBookmarks";
+import useFetchPostById from "@/hooks/usefetchPostById";
+
+type QueryParams = {
+  id: string;
+};
 
 export default function Poem() {
+  const { id } = useLocalSearchParams() as QueryParams;
   const { session } = useSession();
   const author_id = session?.user.id ?? "";
-  const { data, isPending, isRefetching, refetch } = useFetchPosts();
+  const { data, isPending, isRefetching, refetch } = useFetchPostById(id);
+
   const { data: bookmarks, isPending: isFetchingBoomarks } =
     useFetchBookmarks(author_id);
-  const { id } = useLocalSearchParams();
   const { mutate, isPending: isMutating } = useUpdateBookmark(author_id);
 
   function handleBookmark() {
@@ -50,7 +56,7 @@ export default function Poem() {
     return <ActivityIndicator />;
   }
 
-  const currentPost = data?.data?.find((post) => post.id === id);
+  const currentPost = data?.data ?? ({} as Partial<PostType>);
   const isBookmarked =
     bookmarks?.data?.find((bookmark) => bookmark.post_id === id) !== undefined;
 
