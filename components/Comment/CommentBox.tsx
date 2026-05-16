@@ -1,55 +1,42 @@
-// Library
-import React from "react";
-import { SendDiagonal } from "iconoir-react-native";
-import {
-  ActivityIndicator,
-  Keyboard,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React from 'react';
+import { SendDiagonal } from 'iconoir-react-native';
+import { ActivityIndicator, Keyboard, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-// Components
-import { InputBoxClean } from "../ui/InputBox";
-import Flex from "../ui/Flex";
+import { InputBoxClean } from '../ui/InputBox';
+import Flex from '../ui/Flex';
 
-// Constants
-import { Icon } from "@/constants/Icon";
-import { Colors } from "@/constants/Colors";
-import { useSession } from "@/wrapper/SessionWrapper";
-import useAddComment, { PseudoCommentType } from "@/hooks/useAddComment";
+import { Icon } from '@/constants/Icon';
+import { Colors } from '@/constants/Colors';
+import type { Id } from '@/convex/_generated/dataModel';
+import { useSession } from '@/wrapper/SessionWrapper';
+import useAddComment from '@/hooks/useAddComment';
 
 type CommentBoxProps = {
-  postId: string;
+  poemId: Id<'poems'>;
+  poemAuthorId: Id<'users'> | null;
 };
 
-export default function CommentBox({ postId }: CommentBoxProps) {
-  const { session } = useSession();
-  const userId = session?.user.id ?? "";
-  const { mutate, isPending } = useAddComment(postId);
+export default function CommentBox({ poemId, poemAuthorId }: CommentBoxProps) {
+  const { user } = useSession();
+  const writeComment = useAddComment();
 
-  const [commentText, setCommentText] = React.useState("");
+  const [commentText, setCommentText] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
 
-  function handleSubmit() {
+  async function handleSubmit() {
+    if (!user || !poemAuthorId) return;
+    const body = commentText.trim();
+    if (!body) return;
     try {
       setIsLoading(true);
-
-      const payload = {} as PseudoCommentType;
-
-      if (commentText.trim().length > 0) {
-        payload["message"] = commentText.trim();
-      } else {
-        return;
-      }
-
-      payload["author_id"] = userId;
-      payload["post_id"] = postId;
-
-      mutate(payload);
-      setCommentText("");
+      await writeComment({
+        poemId,
+        body,
+        authorId: user._id,
+        poemAuthorId,
+      });
+      setCommentText('');
       Keyboard.dismiss();
-    } catch {
     } finally {
       setIsLoading(false);
     }
@@ -64,16 +51,8 @@ export default function CommentBox({ postId }: CommentBoxProps) {
           placeholder="type your comment here"
           multiline
         />
-        <TouchableOpacity
-          style={styles.sendButton}
-          onPress={handleSubmit}
-          disabled={isPending || isLoading}
-        >
-          {isLoading || isPending ? (
-            <ActivityIndicator />
-          ) : (
-            <SendDiagonal {...Icon} />
-          )}
+        <TouchableOpacity style={styles.sendButton} onPress={handleSubmit} disabled={isLoading}>
+          {isLoading ? <ActivityIndicator /> : <SendDiagonal {...Icon} />}
         </TouchableOpacity>
       </Flex>
     </View>
@@ -82,19 +61,16 @@ export default function CommentBox({ postId }: CommentBoxProps) {
 
 const styles = StyleSheet.create({
   conatiner: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 0,
     left: 0,
-    width: "100%",
+    width: '100%',
     paddingHorizontal: 16,
     borderTopWidth: 1,
     borderTopColor: Colors.light.lightGray,
 
     shadowColor: Colors.light.grayed,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
 

@@ -1,44 +1,32 @@
-// Library
-import React from "react";
-import { PeaceHand } from "iconoir-react-native";
-import { useQueryClient } from "@tanstack/react-query";
-import { router } from "expo-router";
+import React from 'react';
+import { PeaceHand } from 'iconoir-react-native';
+import { router } from 'expo-router';
 
-// Components
-import Container from "@/components/ui/Container";
-import { Paragraph } from "@/components/ui/Text";
-import Flex from "@/components/ui/Flex";
-import ErrorBox from "@/components/ui/ErrorBox";
-import Button from "@/components/ui/Button";
+import Container from '@/components/ui/Container';
+import { Paragraph } from '@/components/ui/Text';
+import Flex from '@/components/ui/Flex';
+import ErrorBox from '@/components/ui/ErrorBox';
+import Button from '@/components/ui/Button';
 
-// Constants
-import { Colors } from "@/constants/Colors";
-import { signOut } from "@/util/auth";
-import { jumpToHome } from "@/util/jumpTo";
-import { useSession } from "@/wrapper/SessionWrapper";
+import { Colors } from '@/constants/Colors';
+import { jumpToHome } from '@/util/jumpTo';
+import { useSession } from '@/wrapper/SessionWrapper';
 
 export default function Page() {
-  const { session } = useSession();
-  const userId = session?.user.id ?? "";
-
-  const queryClient = useQueryClient();
+  const { signOut } = useSession();
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     async function logout() {
-      const { ok, ...rest } = await signOut();
-      if (!ok) {
-        if (rest.message) {
-          setErrorMessage(rest.message);
-          return;
-        }
+      try {
+        await signOut();
+        router.replace('/');
+      } catch (err) {
+        setErrorMessage(err instanceof Error ? err.message : 'Logout failed');
       }
-      queryClient.invalidateQueries({ queryKey: ["author", userId] });
-      router.replace("/");
     }
-
     logout();
-  }, [queryClient, userId]);
+  }, [signOut]);
 
   return (
     <Container>
@@ -50,12 +38,7 @@ export default function Page() {
           </>
         ) : (
           <>
-            <PeaceHand
-              color={Colors.light.text}
-              height={42}
-              width={42}
-              strokeWidth={1.2}
-            />
+            <PeaceHand color={Colors.light.text} height={42} width={42} strokeWidth={1.2} />
             <Paragraph>logging you out...</Paragraph>
           </>
         )}

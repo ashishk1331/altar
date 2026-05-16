@@ -1,36 +1,27 @@
-// Library
-import {
-  StyleSheet,
-  ScrollView,
-  View,
-  TouchableOpacity,
-  RefreshControl,
-  ActivityIndicator,
-} from "react-native";
-import { Bookmark, ChatBubbleEmpty, Heart } from "iconoir-react-native";
-import { useLocalSearchParams } from "expo-router";
-import { formatDistanceToNow } from "date-fns";
+import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Bookmark, BookmarkSolid, ChatBubbleEmpty, Heart, HeartSolid } from 'iconoir-react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { useMutation } from 'convex/react';
+import { formatDistanceToNow } from 'date-fns';
 
-// Components
-import Navbar from "@/components/ui/Navbar";
-import Separator from "@/components/ui/Separator";
-import { IconButton } from "@/components/ui/Button";
-import Flex from "@/components/ui/Flex";
-import Comment from "@/components/Comment";
-import { Caption, Footnote, LargeBody, Paragraph } from "@/components/ui/Text";
-import Avatar from "@/components/ui/Avatar";
-import CommentBox from "@/components/Comment/CommentBox";
+import Navbar from '@/components/ui/Navbar';
+import Separator from '@/components/ui/Separator';
+import { IconButton } from '@/components/ui/Button';
+import Flex from '@/components/ui/Flex';
+import Comment from '@/components/Comment';
+import { Caption, Footnote, LargeBody, Paragraph } from '@/components/ui/Text';
+import Avatar from '@/components/ui/Avatar';
+import CommentBox from '@/components/Comment/CommentBox';
 
-// Constants
-import { Icon } from "@/constants/Icon";
-import { Colors } from "@/constants/Colors";
-import { jumpToProfile } from "@/util/jumpTo";
-import { PostType } from "@/hooks/useFetchPosts";
-import useFetchCommentsForPost from "@/hooks/useFetchCommentsForPost";
-import { useSession } from "@/wrapper/SessionWrapper";
-import useUpdateBookmark from "@/hooks/useUpdateBookmark";
-import useFetchBookmarks from "@/hooks/useFetchBookmarks";
-import useFetchPostById from "@/hooks/usefetchPostById";
+import { Icon } from '@/constants/Icon';
+import { Colors } from '@/constants/Colors';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
+import { jumpToProfile } from '@/util/jumpTo';
+import useFetchCommentsForPost from '@/hooks/useFetchCommentsForPost';
+import { useSession } from '@/wrapper/SessionWrapper';
+import useUpdateBookmark from '@/hooks/useUpdateBookmark';
+import useFetchPostById from '@/hooks/usefetchPostById';
 
 type QueryParams = {
   id: string;
@@ -38,102 +29,111 @@ type QueryParams = {
 
 export default function Poem() {
   const { id } = useLocalSearchParams() as QueryParams;
-  const { session } = useSession();
-  const author_id = session?.user.id ?? "";
-  const { data, isPending, isRefetching, refetch } = useFetchPostById(id);
+  const poemId = id as Id<'poems'>;
 
-  const { data: bookmarks, isPending: isFetchingBoomarks } =
-    useFetchBookmarks(author_id);
-  const { mutate, isPending: isMutating } = useUpdateBookmark(author_id);
+  const { user } = useSession();
+  const { post, isPending } = useFetchPostById(poemId, user?._id);
 
-  function handleBookmark() {
-    if (id && typeof id === "string" && !isMutating) {
-      mutate({ author_id, post_id: id });
-    }
-  }
+  const toggleBookmark = useUpdateBookmark();
+  const likePoem = useMutation(api.likes.likePoem);
+  const dislikePoem = useMutation(api.likes.dislikePoem);
 
-  if ((isPending || isFetchingBoomarks) && !data) {
+  if (isPending || !post) {
     return <ActivityIndicator />;
   }
 
-  const currentPost = data?.data ?? ({} as Partial<PostType>);
-  const isBookmarked =
-    bookmarks?.data?.find((bookmark) => bookmark.post_id === id) !== undefined;
+  const authorName = post.author?.name || post.author?.firstName || 'anonymous';
+  const authorPicture = post.author?.picture || '';
+
+  function handleBookmark() {
+    if (!user || !post) return;
+    toggleBookmark({
+      authorId: user._id,
+      poemId: post._id,
+      isBookmarked: post.isBookmarked,
+    });
+  }
+
+  function handleLike() {
+    if (!user || !post?.author) return;
+    const args = {
+      authorId: user._id,
+      poemId: post._id,
+      poemAuthorId: post.author._id,
+    };
+    if (post.isLiked) {
+      dislikePoem(args);
+    } else {
+      likePoem(args);
+    }
+  }
 
   return (
     <>
-      <ScrollView
-        style={[styles.container, styles.outer]}
-        refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
-        }
-      >
+      <ScrollView style={[styles.container, styles.outer]}>
         <Navbar title="" />
         <Flex w="100%" direction="column" gap={10} p={10}>
-          <LargeBody>{currentPost?.title}</LargeBody>
-          <Paragraph>{currentPost?.content}</Paragraph>
+          <LargeBody>{post.title}</LargeBody>
+          <Paragraph>{post.body}</Paragraph>
         </Flex>
         <Separator />
-        <TouchableOpacity
-          onPress={() => jumpToProfile(currentPost?.author_id || "")}
-        >
+        <TouchableOpacity onPress={() => jumpToProfile(post.authorId)}>
           <Flex gap={10} items="center" justify="flex-start" w="100%" p={10}>
-            <Avatar width={28} name={currentPost?.authors?.name || "Maya"} />
-            <Footnote>{currentPost?.authors?.name || "Maya"}</Footnote>
+            <Avatar width={28} name={authorName} src={authorPicture} />
+            <Footnote>{authorName}</Footnote>
             <Footnote color={Colors.light.grayed}>
-              {formatDistanceToNow(new Date(currentPost?.created_at || ""))}
+              {formatDistanceToNow(new Date(post._creationTime))}
             </Footnote>
           </Flex>
         </TouchableOpacity>
         <Flex items="center" w="100%" justify="space-between" p={10}>
           <Flex gap={24}>
             <Flex gap={0} items="center">
-              <IconButton>
-                <Heart {...Icon} />
+              <IconButton onPress={handleLike}>
+                {post.isLiked ? (
+                  <HeartSolid color={Colors.light.active} width={Icon.width} height={Icon.height} />
+                ) : (
+                  <Heart {...Icon} />
+                )}
               </IconButton>
-              {currentPost && (currentPost.like_count ?? 0) > 0 && (
-                <Caption>{currentPost.like_count}</Caption>
-              )}
+              {post.likeCount > 0 && <Caption>{post.likeCount}</Caption>}
             </Flex>
             <Flex gap={0} items="center">
               <IconButton>
                 <ChatBubbleEmpty {...Icon} />
               </IconButton>
-              {currentPost && (currentPost.comment_count ?? 0) > 0 && (
-                <Caption>{currentPost.comment_count}</Caption>
-              )}
+              {post.commentCount > 0 && <Caption>{post.commentCount}</Caption>}
             </Flex>
           </Flex>
 
           <IconButton onPress={handleBookmark}>
-            <Bookmark
-              fill={isBookmarked ? Colors.light.active : "transparent"}
-              color={isBookmarked ? "transparent" : Colors.light.grayed}
-              width={Icon.width}
-              height={Icon.height}
-            />
+            {post.isBookmarked ? (
+              <BookmarkSolid color={Colors.light.active} width={Icon.width} height={Icon.height} />
+            ) : (
+              <Bookmark {...Icon} />
+            )}
           </IconButton>
         </Flex>
         <Separator />
-        <CommentsContainer post_id={id as string} />
+        <CommentsContainer poemId={poemId} />
       </ScrollView>
-      <CommentBox postId={id} />
+      <CommentBox poemId={poemId} poemAuthorId={post.author?._id ?? null} />
     </>
   );
 }
 
-function CommentsContainer({ post_id }: { post_id: string }) {
-  const { data, isPending } = useFetchCommentsForPost(post_id);
+function CommentsContainer({ poemId }: { poemId: Id<'poems'> }) {
+  const { comments, isPending } = useFetchCommentsForPost(poemId);
 
-  if (isPending) {
+  if (isPending || !comments) {
     return null;
   }
 
   return (
     <View style={styles.bottomPadding}>
       <Flex direction="column" w="100%">
-        {data?.data?.map((comment, index) => (
-          <Comment key={index} comment={comment} />
+        {comments.map((comment) => (
+          <Comment key={comment._id} comment={comment} />
         ))}
       </Flex>
     </View>
@@ -143,15 +143,12 @@ function CommentsContainer({ post_id }: { post_id: string }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: "100%",
-    flexDirection: "column",
+    width: '100%',
+    flexDirection: 'column',
     gap: 10,
   },
   outer: {
     padding: 10,
-  },
-  list: {
-    paddingVertical: 10,
   },
   bottomPadding: {
     paddingBottom: 64,

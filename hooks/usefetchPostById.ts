@@ -1,19 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/util/supabase";
+import { useQuery } from 'convex/react';
 
-const getAllPostById = async (postId: string) => {
-  return supabase
-    .from("posts")
-    .select("*, authors ( name )")
-    .eq("id", postId)
-    .single();
-};
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
 
-export default function useFetchPostById(postId: string) {
-  const postsQuery = useQuery({
-    queryKey: ["posts", postId],
-    queryFn: () => getAllPostById(postId),
-  });
+export default function useFetchPostById(poemId: Id<'poems'>, userId?: Id<'users'>) {
+  const post = useQuery(api.poems.readAPoem, { poemId, userId });
 
-  return postsQuery;
+  return {
+    post,
+    isPending: post === undefined,
+  };
 }

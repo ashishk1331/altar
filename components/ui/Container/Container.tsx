@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
+import type React from 'react';
+import { StyleSheet, View } from 'react-native';
 
 type ContainerProps = {
   children: React.ReactNode;
@@ -12,13 +12,13 @@ export default function Container({ children }: ContainerProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "space-around",
-    alignItems: "center",
+    justifyContent: 'space-around',
+    alignItems: 'center',
   },
   flexColumn: {
-    flexDirection: "column",
+    flexDirection: 'column',
   },
   flexRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
   },
 });

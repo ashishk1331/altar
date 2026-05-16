@@ -1,2 +1,2 @@
-export { default } from "./InputBox";
-export { InputBoxClean } from "./InputBoxClean";
+export { default } from './InputBox';
+export { InputBoxClean } from './InputBoxClean';

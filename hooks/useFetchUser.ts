@@ -1,18 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/util/supabase";
-import { Tables } from "@/types/database.types";
+import { useQuery } from 'convex/react';
 
-const getAuthor = async (id: string) => {
-  return supabase.from("authors").select("*").eq("id", id).single();
-};
+import { api } from '@/convex/_generated/api';
+import type { Doc, Id } from '@/convex/_generated/dataModel';
 
-export default function useFetchUser(id: string) {
-  const postsQuery = useQuery({
-    queryKey: ["author", id],
-    queryFn: () => getAuthor(id),
-  });
+export type AuthorType = Doc<'users'> & { isFollowing: boolean };
 
-  return postsQuery;
+export default function useFetchUser(authorId: Id<'users'>, userId?: Id<'users'>) {
+  const user = useQuery(api.users.readUser, { authorId, userId });
+
+  return {
+    user,
+    isPending: user === undefined,
+  };
 }
-
-export type AuthorType = Tables<"authors">;

@@ -1,27 +1,7 @@
-import { supabase } from "@/util/supabase";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from 'convex/react';
 
-export type DataType = {
-  userId: string;
-  name?: string;
-  bio?: string;
-};
+import { api } from '@/convex/_generated/api';
 
-const updateUser = async (data: DataType) => {
-  const { userId, ...rest } = data;
-  return supabase.from("authors").update(rest).eq("id", userId).select();
-};
-
-export default function useUpdateUser(id: string) {
-  const queryClient = useQueryClient();
-
-  const mutate = useMutation({
-    mutationKey: ["author", id],
-    mutationFn: updateUser,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["author", id] });
-    },
-  });
-
-  return mutate;
+export default function useUpdateUser() {
+  return useMutation(api.users.updateUser);
 }

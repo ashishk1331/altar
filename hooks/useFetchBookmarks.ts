@@ -1,22 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/util/supabase";
-import { Tables } from "@/types/database.types";
+import { usePaginatedQuery } from 'convex/react';
 
-const getBookmarks = async (id: string) => {
-  return supabase
-    .from("bookmarks")
-    .select()
-    .eq("author_id", id)
-    .order("created_at", { ascending: false });
-};
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
 
-export default function useFetchBookmarks(id: string) {
-  const postsQuery = useQuery({
-    queryKey: ["bookmarks", id],
-    queryFn: () => getBookmarks(id),
-  });
+export default function useFetchBookmarks(userId: Id<'users'>) {
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.bookmarks.readBookmarkedPoems,
+    { userId },
+    { initialNumItems: 12 }
+  );
 
-  return postsQuery;
+  return {
+    posts: results,
+    status,
+    loadMore,
+    isPending: status === 'LoadingFirstPage',
+    canLoadMore: status === 'CanLoadMore',
+  };
 }
-
-export type CommentType = Tables<"bookmarks">;

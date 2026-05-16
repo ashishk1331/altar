@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { StyleSheet, TextInput } from "react-native";
+import type React from 'react';
+import { useState } from 'react';
+import { StyleSheet, TextInput } from 'react-native';
 
 type InputBoxCleanProps = {
   value: string;
@@ -37,6 +38,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     padding: 4,
     paddingHorizontal: 8,
-    width: "100%",
+    width: '100%',
   },
 });

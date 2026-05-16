@@ -1,24 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/util/supabase";
-import { Tables } from "@/types/database.types";
-import { AuthorType } from "./useFetchUser";
+import { usePaginatedQuery } from 'convex/react';
 
-const getAllPosts = async () => {
-  return supabase
-    .from("posts")
-    .select("*, authors ( name )")
-    .order("created_at", { ascending: false });
-};
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
 
-export default function useFetchPosts() {
-  const postsQuery = useQuery({
-    queryKey: ["posts"],
-    queryFn: getAllPosts,
-  });
+export default function useFetchPosts(userId?: Id<'users'>) {
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.poems.readPoems,
+    { userId },
+    { initialNumItems: 12 }
+  );
 
-  return postsQuery;
+  return {
+    posts: results,
+    status,
+    loadMore,
+    isPending: status === 'LoadingFirstPage',
+    canLoadMore: status === 'CanLoadMore',
+  };
 }
-
-export type PostType = Tables<"posts"> & {
-  authors: Partial<AuthorType>;
-};

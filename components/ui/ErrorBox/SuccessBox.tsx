@@ -1,12 +1,12 @@
 // Library
-import { CheckCircle } from "iconoir-react-native";
+import { CheckCircle } from 'iconoir-react-native';
 
 // Components
-import { Caption } from "../Text";
-import Flex from "../Flex";
+import { Caption } from '../Text';
+import Flex from '../Flex';
 
 // Contants
-import { Colors } from "@/constants/Colors";
+import { Colors } from '@/constants/Colors';
 
 type SuccessBoxProps = {
   message: string;

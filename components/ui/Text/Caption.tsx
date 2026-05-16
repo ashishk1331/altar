@@ -1,6 +1,6 @@
-import { Text, StyleSheet } from "react-native";
-import { Colors } from "@/constants/Colors";
-import React from "react";
+import { Text, StyleSheet } from 'react-native';
+import { Colors } from '@/constants/Colors';
+import type React from 'react';
 
 type CaptionProps = {
   children: React.ReactNode;
@@ -34,9 +34,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   bold: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   italic: {
-    fontStyle: "italic",
+    fontStyle: 'italic',
   },
 });

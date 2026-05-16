@@ -1,13 +1,16 @@
-// Library
-import { View, StyleSheet, TextInput } from "react-native";
-import { ArrowLeft, Search } from "iconoir-react-native";
-import { router } from "expo-router";
+import { View, StyleSheet, TextInput } from 'react-native';
+import { ArrowLeft, Search } from 'iconoir-react-native';
+import { router } from 'expo-router';
 
-// Components
-import Flex from "../ui/Flex";
-import { IconButton } from "../ui/Button";
+import Flex from '../ui/Flex';
+import { IconButton } from '../ui/Button';
 
-export default function Navbar() {
+type NavbarProps = {
+  value: string;
+  onChange: (next: string) => void;
+};
+
+export default function Navbar({ value, onChange }: NavbarProps) {
   function goBack() {
     router.back();
   }
@@ -19,7 +22,13 @@ export default function Navbar() {
           <ArrowLeft color="black" height={24} width={24} />
         </IconButton>
 
-        <TextInput style={styles.textInput} placeholder="search something" />
+        <TextInput
+          style={styles.textInput}
+          placeholder="search something"
+          value={value}
+          onChangeText={onChange}
+          autoFocus
+        />
 
         <IconButton onPress={() => {}}>
           <Search color="black" height={24} width={24} />

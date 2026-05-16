@@ -1,29 +1,42 @@
-import { Slot, SplashScreen, router } from "expo-router";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import React from "react";
-import { getSession } from "@/util/auth";
-import { SessionProvider } from "@/wrapper/SessionWrapper";
+import React from 'react';
+import { Slot, SplashScreen, router } from 'expo-router';
+import { ConvexProvider } from 'convex/react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import { SessionProvider, useSession } from '@/wrapper/SessionWrapper';
+import { configureGoogleSignIn } from '@/util/auth';
+import { convex } from '@/util/convex';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
-  React.useEffect(() => {
-    async function isThereAnActiveSession() {
-      const { ok } = await getSession();
-      if (ok) {
-        router.replace("/home");
-      }
-      SplashScreen.hideAsync();
-    }
+function Bootstrap({ children }: { children: React.ReactNode }) {
+  const { user, isHydrated } = useSession();
 
-    isThereAnActiveSession();
+  React.useEffect(() => {
+    configureGoogleSignIn();
   }, []);
 
+  React.useEffect(() => {
+    if (!isHydrated) return;
+    if (user) {
+      router.replace('/home');
+    }
+    SplashScreen.hideAsync();
+  }, [isHydrated, user]);
+
+  return <>{children}</>;
+}
+
+export default function RootLayout() {
   return (
-    <SessionProvider>
-      <SafeAreaProvider>
-        <Slot />
-      </SafeAreaProvider>
-    </SessionProvider>
+    <ConvexProvider client={convex}>
+      <SessionProvider>
+        <SafeAreaProvider>
+          <Bootstrap>
+            <Slot />
+          </Bootstrap>
+        </SafeAreaProvider>
+      </SessionProvider>
+    </ConvexProvider>
   );
 }

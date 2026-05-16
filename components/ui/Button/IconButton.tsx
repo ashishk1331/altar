@@ -1,4 +1,4 @@
-import { PressableProps, StyleSheet, TouchableOpacity } from "react-native";
+import { type PressableProps, StyleSheet, TouchableOpacity } from 'react-native';
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -15,8 +15,8 @@ export function IconButton({ children, onPress }: ButtonProps) {
 
 const styles = StyleSheet.create({
   button: {
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 8,
   },
 });

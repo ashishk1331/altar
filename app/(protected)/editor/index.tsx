@@ -1,63 +1,43 @@
-// Library
-import React from "react";
-import { StyleSheet, ScrollView, View, ActivityIndicator } from "react-native";
-// import { FloppyDisk } from "iconoir-react-native";
+import React from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 
-// Components
-import Navbar from "@/components/ui/Navbar";
-import Separator from "@/components/ui/Separator";
-import Flex from "@/components/ui/Flex";
-import { InputBoxClean } from "@/components/ui/InputBox";
-import Button from "@/components/ui/Button";
+import Navbar from '@/components/ui/Navbar';
+import Separator from '@/components/ui/Separator';
+import Flex from '@/components/ui/Flex';
+import { InputBoxClean } from '@/components/ui/InputBox';
+import Button from '@/components/ui/Button';
+import ErrorBox from '@/components/ui/ErrorBox';
 
-// Constants
-import { Colors } from "@/constants/Colors";
-import { useSession } from "@/wrapper/SessionWrapper";
-import useAddPoem, { PseudoPostType } from "@/hooks/useAddPoem";
-import ErrorBox from "@/components/ui/ErrorBox";
-import { jumpToHome } from "@/util/jumpTo";
+import { useSession } from '@/wrapper/SessionWrapper';
+import useAddPoem from '@/hooks/useAddPoem';
+import { jumpToHome } from '@/util/jumpTo';
 
 export default function AddPoem() {
-  const [title, setTitle] = React.useState("");
-  const [content, setContent] = React.useState("");
+  const [title, setTitle] = React.useState('');
+  const [body, setBody] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState("");
+  const [errorMessage, setErrorMessage] = React.useState('');
 
-  const { mutate } = useAddPoem();
+  const writePoem = useAddPoem();
+  const { user } = useSession();
 
-  const { session } = useSession();
-  const userId = session?.user.id ?? "";
+  async function handleSubmit() {
+    setErrorMessage('');
+    if (!title) return setErrorMessage('Title not defined.');
+    if (!body) return setErrorMessage('Write the inner text first.');
+    if (!user) return setErrorMessage('Not signed in.');
 
-  function handleSubmit() {
     try {
       setIsLoading(true);
-      setErrorMessage("");
-
-      let payload = {} as PseudoPostType;
-
-      if (title) {
-        payload["title"] = title;
-      } else {
-        throw new Error("Title not defined.");
-      }
-
-      if (content) {
-        payload["content"] = content;
-      } else {
-        throw new Error("Write the inner text first.");
-      }
-
-      if (userId) {
-        payload["author_id"] = userId;
-      } else {
-        throw new Error("There is a problem while adding the poem.");
-      }
-
-      mutate(payload);
+      await writePoem({
+        title,
+        body,
+        authorId: user._id,
+        isDraft: false,
+      });
       jumpToHome();
-    } catch (err: any) {
-      console.log(err);
-      setErrorMessage(err.message);
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to publish.');
     } finally {
       setIsLoading(false);
     }
@@ -66,15 +46,7 @@ export default function AddPoem() {
   function SaveAndPublish() {
     return (
       <Flex gap={24}>
-        {/*<View>
-          <IconButton>
-            <FloppyDisk color={Colors.light.text} width={24} height={24} />
-          </IconButton>
-          <View style={styles.update} />
-        </View>*/}
-        <Button onPress={handleSubmit}>
-          {isLoading ? <ActivityIndicator /> : "Publish"}
-        </Button>
+        <Button onPress={handleSubmit}>{isLoading ? <ActivityIndicator /> : 'Publish'}</Button>
       </Flex>
     );
   }
@@ -82,22 +54,18 @@ export default function AddPoem() {
   return (
     <ScrollView style={[styles.container, styles.outer]}>
       <Navbar title="Add Poem" right={<SaveAndPublish />} />
-      {errorMessage && (
+      {errorMessage ? (
         <View style={styles.outer}>
           <ErrorBox message={errorMessage} />
         </View>
-      )}
+      ) : null}
       <Flex direction="column" p={10}>
-        <InputBoxClean
-          placeholder="write title here"
-          value={title}
-          setValue={setTitle}
-        />
+        <InputBoxClean placeholder="write title here" value={title} setValue={setTitle} />
         <Separator />
         <InputBoxClean
           placeholder="and the poem goes here"
-          value={content}
-          setValue={setContent}
+          value={body}
+          setValue={setBody}
           multiline
         />
       </Flex>
@@ -108,23 +76,11 @@ export default function AddPoem() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: "100%",
-    flexDirection: "column",
+    width: '100%',
+    flexDirection: 'column',
     marginBottom: 24,
   },
   outer: {
     padding: 10,
-  },
-  list: {
-    paddingVertical: 10,
-  },
-  update: {
-    position: "absolute",
-    top: 6,
-    right: 6,
-    width: 10,
-    height: 10,
-    borderRadius: 10,
-    backgroundColor: Colors.light.wrong,
   },
 });

@@ -1,47 +1,69 @@
-import { supabase } from "@/util/supabase";
-import { Session } from "@supabase/supabase-js";
-import React from "react";
+import React from 'react';
+import { useConvex } from 'convex/react';
 
-type AuthContextType = {
-  session: Session | null;
+import { api } from '@/convex/_generated/api';
+import { type GoogleProfile, signInWithGoogle, signOutGoogle } from '@/util/auth';
+import { type User, useUserStore } from '@/store/userStore';
+
+type SessionContextType = {
+  user: User | null;
   isLoading: boolean;
+  isHydrated: boolean;
+  signIn: () => Promise<User>;
+  signOut: () => Promise<void>;
 };
 
-const AuthContext = React.createContext<AuthContextType>({
-  session: null,
-  isLoading: false,
-});
+const SessionContext = React.createContext<SessionContextType | null>(null);
 
 export function useSession() {
-  const value = React.useContext(AuthContext);
+  const value = React.useContext(SessionContext);
   if (!value) {
-    throw new Error("useSession must be wrapped in a <SessionProvider />");
+    throw new Error('useSession must be used inside <SessionProvider />');
   }
-
   return value;
 }
 
 export function SessionProvider(props: React.PropsWithChildren) {
-  const [session, setSession] = React.useState<Session | null>(null);
+  const convex = useConvex();
+  const user = useUserStore((s) => s.user);
+  const isHydrated = useUserStore((s) => s.isHydrated);
+  const setUser = useUserStore((s) => s.setUser);
+  const resetUser = useUserStore((s) => s.resetUser);
 
-  React.useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
+  const [isLoading, setIsLoading] = React.useState(false);
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-  }, []);
+  const signIn = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const profile: GoogleProfile = await signInWithGoogle();
+      const upserted = (await convex.mutation(api.users.upsertUser, {
+        email: profile.email,
+        name: profile.name,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        picture: profile.picture,
+      })) as User;
+      setUser(upserted);
+      return upserted;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [convex, setUser]);
 
-  return (
-    <AuthContext.Provider
-      value={{
-        session,
-        isLoading: false,
-      }}
-    >
-      {props.children}
-    </AuthContext.Provider>
+  const signOut = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await signOutGoogle();
+      resetUser();
+    } finally {
+      setIsLoading(false);
+    }
+  }, [resetUser]);
+
+  const value = React.useMemo(
+    () => ({ user, isLoading, isHydrated, signIn, signOut }),
+    [user, isLoading, isHydrated, signIn, signOut]
   );
+
+  return <SessionContext.Provider value={value}>{props.children}</SessionContext.Provider>;
 }

@@ -1,27 +1,19 @@
-// Library
-import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { EditPencil } from "iconoir-react-native";
-import * as ImagePicker from "expo-image-picker";
-
-// Components
-import Flex from "../ui/Flex";
-import ImageContainer from "../ui/ImageContainer";
-
-// Constants
-import { Colors } from "@/constants/Colors";
+import * as ImagePicker from 'expo-image-picker';
+import { EditPencil } from 'iconoir-react-native';
+import type React from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Colors } from '@/constants/Colors';
+import Flex from '../ui/Flex';
+import ImageContainer from '../ui/ImageContainer';
 
 type ImageSelectionProps = {
   selectedImage: string | null;
   setSelectedImage: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
-export default function ImageSelection({
-  selectedImage,
-  setSelectedImage,
-}: ImageSelectionProps) {
+export default function ImageSelection({ selectedImage, setSelectedImage }: ImageSelectionProps) {
   const pickImageAsync = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       quality: 1,
       aspect: [1, 1],
@@ -30,7 +22,7 @@ export default function ImageSelection({
     if (!result.canceled) {
       setSelectedImage(result.assets[0].uri);
     } else {
-      alert("You did not select any image.");
+      alert('You did not select any image.');
     }
   };
 
@@ -49,17 +41,17 @@ export default function ImageSelection({
 const styles = StyleSheet.create({
   container: {
     borderRadius: (30 / 120) * 128 + 6,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
   cover: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     width: 128,
     height: 128,
-    backgroundColor: Colors.light.text + "80",
+    backgroundColor: `${Colors.light.text}80`,
 
-    alignItems: "center",
-    justifyContent: "space-around",
+    alignItems: 'center',
+    justifyContent: 'space-around',
   },
 });

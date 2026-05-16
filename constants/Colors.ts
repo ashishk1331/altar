@@ -5,12 +5,12 @@
 
 export const Colors = {
   light: {
-    text: "#120D31",
-    background: "#fff",
-    grayed: "#868686",
-    lightGray: "#F8F8F8",
-    active: "#5689FF",
-    wrong: "#FF2E1F",
-    success: "#00cca3",
+    text: '#120D31',
+    background: '#fff',
+    grayed: '#868686',
+    lightGray: '#F8F8F8',
+    active: '#5689FF',
+    wrong: '#FF2E1F',
+    success: '#00cca3',
   },
 };

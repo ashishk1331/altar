@@ -1,12 +1,14 @@
-import { Colors } from "@/constants/Colors";
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from 'react-native';
+
+import { Colors } from '@/constants/Colors';
 
 type AvatarProps = {
   width: number;
   name: string;
+  src?: string;
 };
 
-export default function Avatar({ width, name }: AvatarProps) {
+export default function Avatar({ width, name, src }: AvatarProps) {
   const squareSize = {
     width,
     height: width,
@@ -15,10 +17,15 @@ export default function Avatar({ width, name }: AvatarProps) {
   const fontStyles = {
     fontSize: width / 1.8,
   };
+
+  if (src) {
+    return <Image source={{ uri: src }} style={[styles.avatar, squareSize]} />;
+  }
+
   return (
     <View style={[styles.avatar, squareSize]}>
       <Text style={[styles.avatarText, fontStyles]}>
-        {name && name.length > 1 ? name.charAt(0).toUpperCase() : "M"}
+        {name && name.length > 1 ? name.charAt(0).toUpperCase() : 'M'}
       </Text>
     </View>
   );
@@ -26,9 +33,9 @@ export default function Avatar({ width, name }: AvatarProps) {
 
 const styles = StyleSheet.create({
   avatar: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-around",
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around',
     backgroundColor: Colors.light.active,
   },
   avatarText: {

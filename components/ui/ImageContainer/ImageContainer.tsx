@@ -1,4 +1,4 @@
-import { Image } from "react-native";
+import { Image, type ImageSourcePropType } from 'react-native';
 
 type ImageContainerProps = {
   src?: string | null;
@@ -6,12 +6,12 @@ type ImageContainerProps = {
 };
 
 export default function ImageContainer({ src, width }: ImageContainerProps) {
-  let source;
+  let source: ImageSourcePropType;
   if (src) {
     source = { uri: src };
   } else {
     // fallback to default avatar
-    source = require("../../../assets/images/avatar.png");
+    source = require('../../../assets/images/avatar.png');
   }
 
   return (

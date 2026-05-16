@@ -1,6 +1,5 @@
-import { Colors } from "@/constants/Colors";
-import React from "react";
-import { TextInput, StyleSheet } from "react-native";
+import { StyleSheet, TextInput } from 'react-native';
+import { Colors } from '@/constants/Colors';
 
 type InputBoxProps = {
   value: string;
@@ -8,11 +7,7 @@ type InputBoxProps = {
   placeholder: string;
 };
 
-export default function InputBox({
-  value,
-  setValue,
-  placeholder,
-}: InputBoxProps) {
+export default function InputBox({ value, setValue, placeholder }: InputBoxProps) {
   return (
     <TextInput
       style={styles.inputBox}
@@ -25,10 +20,10 @@ export default function InputBox({
 
 const styles = StyleSheet.create({
   inputBox: {
-    width: "100%",
+    width: '100%',
     padding: 4,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.light.grayed + "40",
+    borderBottomColor: `${Colors.light.grayed}40`,
     fontSize: 17,
     lineHeight: 24,
   },

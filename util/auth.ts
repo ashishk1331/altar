@@ -1,109 +1,47 @@
-import { supabase } from "./supabase";
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
-export async function createUser(email: string, password: string) {
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
+let configured = false;
+
+export function configureGoogleSignIn() {
+  if (configured) return;
+  GoogleSignin.configure({
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '',
+    offlineAccess: false,
   });
+  configured = true;
+}
 
-  if (error) {
-    return {
-      ok: false,
-      message: error.message,
-    };
+export type GoogleProfile = {
+  email: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  picture: string;
+};
+
+export async function signInWithGoogle(): Promise<GoogleProfile> {
+  configureGoogleSignIn();
+  await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+  const result = await GoogleSignin.signIn();
+
+  if (result.type !== 'success') {
+    throw new Error('Sign-in cancelled');
   }
+
+  const u = result.data.user;
   return {
-    ok: true,
+    email: u.email,
+    name: u.name ?? u.email,
+    firstName: u.givenName ?? '',
+    lastName: u.familyName ?? '',
+    picture: u.photo ?? '',
   };
 }
 
-export async function loginUser(email: string, password: string) {
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    return {
-      ok: false,
-      message: error.message,
-    };
-  }
-  return {
-    ok: true,
-  };
-}
-
-export async function signOut() {
-  const { error } = await supabase.auth.signOut();
-
-  if (error) {
-    return {
-      ok: false,
-      message: error.message,
-    };
-  }
-  return {
-    ok: true,
-  };
-}
-
-export async function getUser() {
+export async function signOutGoogle() {
   try {
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
-
-    if (error) {
-      throw error;
-    }
-
-    return {
-      ok: true,
-      user,
-    };
-  } catch (err: any) {
-    return {
-      ok: false,
-      message: err.message,
-    };
+    await GoogleSignin.signOut();
+  } catch {
+    // user may not have been signed in yet; ignore
   }
-}
-
-export async function getSession() {
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession();
-
-  if (error) {
-    return {
-      ok: false,
-      message: error.message,
-    };
-  } else if (!session) {
-    return {
-      ok: false,
-      message: "No active session exists.",
-    };
-  }
-  return {
-    ok: true,
-    session,
-  };
-}
-
-export async function resetPassword(newPassword: string) {
-  const { data, error } = await supabase.auth.updateUser({
-    password: newPassword,
-  });
-
-  if (error) {
-    return {
-      ok: false,
-      message: error.message,
-    };
-  }
-  return {
-    ok: true,
-    data,
-  };
 }

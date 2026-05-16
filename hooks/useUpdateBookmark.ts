@@ -1,65 +1,25 @@
-import { supabase } from "@/util/supabase";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from 'convex/react';
 
-export type PseudoBookmarkType = {
-  author_id: string;
-  post_id: string;
-};
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
 
-const updateBookmark = async (data: PseudoBookmarkType) => {
-  const { author_id, post_id } = data;
+export default function useUpdateBookmark() {
+  const add = useMutation(api.bookmarks.addBookmark);
+  const remove = useMutation(api.bookmarks.removeBookmark);
 
-  // Check if the bookmark exists
-  const { data: existingBookmark, error: selectError } = await supabase
-    .from("bookmarks")
-    .select("*")
-    .eq("author_id", author_id)
-    .eq("post_id", post_id)
-    .single();
-
-  if (selectError && selectError.code !== "PGRST116") {
-    // Handle error if it's not "No rows found"
-    console.error("Error checking bookmark:", selectError);
-    return;
-  }
-
-  if (existingBookmark) {
-    // Bookmark exists, delete it
-    const { error: deleteError } = await supabase
-      .from("bookmarks")
-      .delete()
-      .eq("author_id", author_id)
-      .eq("post_id", post_id);
-
-    if (deleteError) {
-      console.error("Error deleting bookmark:", deleteError);
+  return async function toggle({
+    authorId,
+    poemId,
+    isBookmarked,
+  }: {
+    authorId: Id<'users'>;
+    poemId: Id<'poems'>;
+    isBookmarked: boolean;
+  }) {
+    if (isBookmarked) {
+      await remove({ authorId, poemId });
     } else {
-      console.log("Bookmark deleted");
+      await add({ authorId, poemId });
     }
-  } else {
-    // Bookmark doesn't exist, insert it
-    const { error: insertError } = await supabase
-      .from("bookmarks")
-      .insert([data]);
-
-    if (insertError) {
-      console.error("Error inserting bookmark:", insertError);
-    } else {
-      console.log("Bookmark added");
-    }
-  }
-};
-
-export default function useUpdateBookmark(id: string) {
-  const queryClient = useQueryClient();
-
-  const mutate = useMutation({
-    mutationKey: ["bookmarks", id],
-    mutationFn: updateBookmark,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bookmarks", id] });
-    },
-  });
-
-  return mutate;
+  };
 }

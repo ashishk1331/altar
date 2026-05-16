@@ -1,48 +1,28 @@
-// Libraru
-import React from "react";
-import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
-import { router } from "expo-router";
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { type Href, router } from 'expo-router';
 
-// Components
-import Flex from "../ui/Flex";
-import { Paragraph } from "../ui/Text";
-import Separator from "../ui/Separator";
+import Flex from '../ui/Flex';
+import { Paragraph } from '../ui/Text';
+import Separator from '../ui/Separator';
 
-// Constants
-import { Colors } from "@/constants/Colors";
-import { useSession } from "@/wrapper/SessionWrapper";
+import { Colors } from '@/constants/Colors';
+import { useSession } from '@/wrapper/SessionWrapper';
 
 export default function Setting() {
-  const { session } = useSession();
+  const { user } = useSession();
   const items = [
-    {
-      label: "Visit Profile",
-      href: "/user/" + session?.user.id,
-    },
-    {
-      label: "Edit Profile",
-      href: "/profile/edit-profile",
-    },
-    {
-      label: "Posts",
-      href: "/profile/posts",
-    },
-    // {
-    //   label: "Drafts",
-    //   href: "/profile/drafts",
-    // },
-    {
-      label: "Bookmarks",
-      href: "/profile/bookmarks",
-    },
-    {
-      label: "Log Out",
-      href: "/logout",
-    },
+    { label: 'Visit Profile', href: `/user/${user?._id ?? ''}` },
+    { label: 'Edit Profile', href: '/profile/edit-profile' },
+    { label: 'Posts', href: '/profile/posts' },
+    { label: 'Drafts', href: '/profile/drafts' },
+    { label: 'Bookmarks', href: '/profile/bookmarks' },
+    { label: 'Notifications', href: '/notifications' },
+    { label: 'Log Out', href: '/logout' },
   ];
 
   function goTo(href: string) {
-    router.push(href);
+    router.push(href as Href);
   }
 
   return (
@@ -51,7 +31,7 @@ export default function Setting() {
         {items.map(({ label, href }) => (
           <React.Fragment key={href}>
             <TouchableOpacity style={styles.button} onPress={() => goTo(href)}>
-              {label === "Log Out" ? (
+              {label === 'Log Out' ? (
                 <Text style={styles.logout}>{label}</Text>
               ) : (
                 <Paragraph>{label}</Paragraph>
@@ -66,12 +46,8 @@ export default function Setting() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 24,
-  },
-  button: {
-    padding: 6,
-  },
+  container: { marginTop: 24 },
+  button: { padding: 6 },
   logout: {
     color: Colors.light.wrong,
     fontSize: 17,

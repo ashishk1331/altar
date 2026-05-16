@@ -1,44 +1,41 @@
-import Navbar from "@/components/ui/Navbar";
-import Post from "@/components/Post";
-import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
-import Separator from "@/components/ui/Separator";
-import { useSession } from "@/wrapper/SessionWrapper";
-import useFetchPostsByUser from "@/hooks/useFetchPostsByUser";
-import useFetchBookmarks from "@/hooks/useFetchBookmarks";
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+
+import Post from '@/components/Post';
+import Navbar from '@/components/ui/Navbar';
+import Separator from '@/components/ui/Separator';
+
+import useFetchPostsByUser from '@/hooks/useFetchPostsByUser';
+import { useSession } from '@/wrapper/SessionWrapper';
 
 export default function Posts() {
-  const { session } = useSession();
-  const userId = session?.user.id || "";
-  const { data, isPending, isRefetching, refetch } =
-    useFetchPostsByUser(userId);
-  const { data: bookmarks } = useFetchBookmarks(userId);
+  const { user } = useSession();
+
+  if (!user) return null;
+
+  return <PostsList userId={user._id} />;
+}
+
+function PostsList({ userId }: { userId: import('@/convex/_generated/dataModel').Id<'users'> }) {
+  const { posts, isPending, canLoadMore, loadMore } = useFetchPostsByUser(userId, userId);
 
   return (
     <View style={[styles.container, styles.outer]}>
       <Navbar title="Posts" />
-      {!isPending && (
+      {isPending ? (
+        <ActivityIndicator />
+      ) : (
         <FlatList
-          data={data?.data}
+          data={posts}
           renderItem={({ item: post }) => (
             <>
-              <Post
-                id={post.id}
-                post={post}
-                isEditable
-                isBookmarked={
-                  bookmarks?.data?.find(
-                    (bookmark) => bookmark.post_id === post.id,
-                  ) !== undefined
-                }
-              />
+              <Post post={post} isEditable />
               <Separator />
             </>
           )}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           style={styles.list}
-          refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
-          }
+          onEndReached={() => canLoadMore && loadMore(12)}
+          onEndReachedThreshold={0.5}
         />
       )}
     </View>
@@ -48,8 +45,8 @@ export default function Posts() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: "100%",
-    flexDirection: "column",
+    width: '100%',
+    flexDirection: 'column',
   },
   outer: {
     padding: 10,

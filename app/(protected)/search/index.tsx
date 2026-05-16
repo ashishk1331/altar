@@ -1,76 +1,52 @@
-// Library
-import React from "react";
-import { StyleSheet, View, FlatList, TouchableOpacity } from "react-native";
+import React from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 
-// Components
-import Navbar from "@/components/search/Navbar";
-import Tabs from "@/components/home/FeedTabs";
-import Post from "@/components/Post";
-import Separator from "@/components/ui/Separator";
-import ProfileHeader from "@/components/profile/ProfileHeader";
-import Flex from "@/components/ui/Flex";
-// import Container from "@/components/ui/Container";
-import { Paragraph } from "@/components/ui/Text";
+import Navbar from '@/components/search/Navbar';
+import Post from '@/components/Post';
+import Separator from '@/components/ui/Separator';
+import Flex from '@/components/ui/Flex';
+import { Paragraph } from '@/components/ui/Text';
 
-// Constants
-// import { Colors } from "@/constants/Colors";
-import { jumpToProfile } from "@/util/jumpTo";
+import { usePaginatedQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 
-export default function AddPoem() {
-  const list: string[] = ["Posts", "Users"];
-  const [activeTab, setActiveTab] = React.useState(list[0]);
-  const data = Array(12)
-    .fill("")
-    .map((_, id) => ({ id: String(id) }));
+export default function Search() {
+  const [searchText, setSearchText] = React.useState('');
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.poems.searchPoem,
+    searchText.trim().length > 0 ? { searchText } : 'skip',
+    { initialNumItems: 12 }
+  );
 
-  function UserCard({ id }: { id: string }) {
-    return (
-      <View style={styles.listHori}>
-        <Flex direction="column">
-          <TouchableOpacity onPress={() => jumpToProfile(id)}>
-            <ProfileHeader />
-          </TouchableOpacity>
-          <Separator />
-        </Flex>
-      </View>
-    );
-  }
-
-  function PostCard({ id }: { id: string }) {
-    return (
-      <>
-        <Post id={id} />
-        <Separator />
-      </>
-    );
-  }
-
-  // function EmptyCard() {
-  //   return (
-  //     <Container>
-  //       <Paragraph color={Colors.light.grayed}>Nothing Found</Paragraph>
-  //     </Container>
-  //   );
-  // }
+  const isPending = status === 'LoadingFirstPage';
+  const canLoadMore = status === 'CanLoadMore';
 
   return (
     <View style={[styles.container, styles.outer]}>
-      <Navbar />
-      <Tabs list={list} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Navbar value={searchText} onChange={setSearchText} />
       <Flex w="100%" justify="space-between" items="center" p={10}>
         <Flex items="center" gap={6}>
           <Paragraph>Found</Paragraph>
-          <Paragraph bold>{data.length}</Paragraph>
+          <Paragraph bold>{results.length}</Paragraph>
         </Flex>
       </Flex>
-      <FlatList
-        data={data}
-        renderItem={({ item: { id } }) =>
-          activeTab === list[0] ? <PostCard id={id} /> : <UserCard id={id} />
-        }
-        keyExtractor={(item) => item.id}
-        style={styles.list}
-      />
+      {isPending && searchText.trim().length > 0 ? (
+        <ActivityIndicator />
+      ) : (
+        <FlatList
+          data={results}
+          renderItem={({ item: post }) => (
+            <>
+              <Post post={{ ...post, isBookmarked: false, isLiked: false }} />
+              <Separator />
+            </>
+          )}
+          keyExtractor={(item) => item._id}
+          style={styles.list}
+          onEndReached={() => canLoadMore && loadMore(12)}
+          onEndReachedThreshold={0.5}
+        />
+      )}
     </View>
   );
 }
@@ -78,17 +54,10 @@ export default function AddPoem() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: "100%",
-    flexDirection: "column",
+    width: '100%',
+    flexDirection: 'column',
     marginBottom: 24,
   },
-  outer: {
-    padding: 10,
-  },
-  list: {
-    paddingVertical: 10,
-  },
-  listHori: {
-    paddingHorizontal: 6,
-  },
+  outer: { padding: 10 },
+  list: { paddingVertical: 10 },
 });

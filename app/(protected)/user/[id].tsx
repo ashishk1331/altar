@@ -1,101 +1,97 @@
-// Library
-import { StyleSheet, View, FlatList, RefreshControl } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useMutation } from 'convex/react';
+import { StyleSheet, View, FlatList, ActivityIndicator } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 
-// Components
-import Post from "@/components/Post";
-import ProfileHeader from "@/components/profile/ProfileHeader";
-import Button from "@/components/ui/Button";
-import Flex from "@/components/ui/Flex";
-import Navbar from "@/components/ui/Navbar";
-import Separator from "@/components/ui/Separator";
-import { Paragraph } from "@/components/ui/Text";
-import EmptyFeed from "@/components/home/EmptyFeed";
+import EmptyFeed from '@/components/home/EmptyFeed';
+import Post from '@/components/Post';
+import ProfileHeader from '@/components/profile/ProfileHeader';
+import Button from '@/components/ui/Button';
+import Flex from '@/components/ui/Flex';
+import Navbar from '@/components/ui/Navbar';
+import Separator from '@/components/ui/Separator';
+import { Paragraph } from '@/components/ui/Text';
 
-// Constants
-import useFetchPostsByUser from "@/hooks/useFetchPostsByUser";
-import { useSession } from "@/wrapper/SessionWrapper";
-import useFetchBookmarks from "@/hooks/useFetchBookmarks";
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
+import useFetchPostsByUser from '@/hooks/useFetchPostsByUser';
+import useFetchUser from '@/hooks/useFetchUser';
+import { useSession } from '@/wrapper/SessionWrapper';
 
-type QueryParams = {
-  id: string;
-};
+type QueryParams = { id: string };
 
 export default function Profile() {
-  const { session } = useSession();
-  const userId = session?.user.id ?? "";
-
+  const { user: viewer } = useSession();
   const { id } = useLocalSearchParams() as QueryParams;
-  const { data, isPending, isRefetching, refetch } = useFetchPostsByUser(id);
-  const { data: bookmarks } = useFetchBookmarks(id);
+  const authorId = id as Id<'users'>;
 
-  if (isPending || isRefetching) {
+  const { posts, isPending, canLoadMore, loadMore } = useFetchPostsByUser(authorId, viewer?._id);
+  const { user: author } = useFetchUser(authorId, viewer?._id);
+  const follow = useMutation(api.followers.followAuthor);
+  const unfollow = useMutation(api.followers.unfollowAuthor);
+
+  if (isPending) {
     return <EmptyFeed message="loading profile" />;
   }
 
-  const isAuthorTheUser = userId === id;
+  const isAuthorTheUser = viewer?._id === authorId;
+
+  function handleFollow() {
+    if (!viewer || !author) return;
+    if (author.isFollowing) {
+      unfollow({ followee: authorId, follower: viewer._id });
+    } else {
+      follow({ followee: authorId, follower: viewer._id });
+    }
+  }
 
   return (
     <Flex direction="column" gap={0} p={10}>
       <Navbar title="" />
       <FlatList
-        data={data?.data || []}
+        data={posts}
         renderItem={({ item: post }) => (
           <>
-            <Post
-              id={post.id}
-              post={post}
-              isBookmarked={
-                bookmarks?.data?.find(
-                  (bookmark) => bookmark.post_id === post.id,
-                ) !== undefined
-              }
-            />
+            <Post post={post} />
             <Separator />
           </>
         )}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         style={styles.list}
         ListHeaderComponent={() => (
           <Flex direction="column" gap={0}>
             <View style={styles.profile}>
-              <ProfileHeader isAtProfilePage id={id ?? ""} />
+              <ProfileHeader isAtProfilePage id={authorId} />
             </View>
             <Flex w="100%" justify="space-between" items="center" p={10}>
               <Flex items="center" gap={6}>
                 <Paragraph>Posts</Paragraph>
-                <Paragraph bold>{data?.data?.length || 0}</Paragraph>
+                <Paragraph bold>{author?.postCount ?? 0}</Paragraph>
               </Flex>
-              {!isAuthorTheUser && <Button>Follow</Button>}
+              {!isAuthorTheUser && author && (
+                <Button onPress={handleFollow}>{author.isFollowing ? 'Unfollow' : 'Follow'}</Button>
+              )}
             </Flex>
             <Separator />
           </Flex>
         )}
-        ListFooterComponent={() => <View style={styles.bottomPadding} />}
-        refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+        ListFooterComponent={() =>
+          canLoadMore ? (
+            <View style={styles.bottomPadding}>
+              <ActivityIndicator />
+            </View>
+          ) : (
+            <View style={styles.bottomPadding} />
+          )
         }
+        onEndReached={() => canLoadMore && loadMore(12)}
+        onEndReachedThreshold={0.5}
       />
     </Flex>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    width: "100%",
-    flexDirection: "column",
-  },
-  outer: {
-    padding: 10,
-  },
-  list: {
-    paddingVertical: 10,
-  },
-  profile: {
-    paddingHorizontal: 10,
-  },
-  bottomPadding: {
-    paddingBottom: 64,
-  },
+  list: { paddingVertical: 10 },
+  profile: { paddingHorizontal: 10 },
+  bottomPadding: { paddingBottom: 64 },
 });

@@ -1,6 +1,6 @@
-import { Colors } from "@/constants/Colors";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Flex from "../ui/Flex";
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Colors } from '@/constants/Colors';
+import Flex from '../ui/Flex';
 
 type TabsProps = {
   list: string[];
@@ -12,20 +12,13 @@ export default function Tabs({ list, activeTab, setActiveTab }: TabsProps) {
   return (
     <View style={styles.container}>
       <Flex gap={0} justify="center" items="center" w="100%">
-        {list.map((title, index) => (
+        {list.map((title) => (
           <TouchableOpacity
-            key={index}
+            key={title}
             onPress={() => setActiveTab(title)}
             style={[styles.tab, title === activeTab && styles.activeTab]}
           >
-            <Text
-              style={[
-                styles.tabTitle,
-                title === activeTab && styles.activeText,
-              ]}
-            >
-              {title}
-            </Text>
+            <Text style={[styles.tabTitle, title === activeTab && styles.activeText]}>{title}</Text>
           </TouchableOpacity>
         ))}
       </Flex>
@@ -35,7 +28,7 @@ export default function Tabs({ list, activeTab, setActiveTab }: TabsProps) {
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
+    width: '100%',
     backgroundColor: Colors.light.lightGray,
     padding: 6,
     marginBottom: 10,
@@ -44,7 +37,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    alignItems: "center",
+    alignItems: 'center',
   },
   tabTitle: {
     fontSize: 12,
@@ -56,6 +49,6 @@ const styles = StyleSheet.create({
   },
   activeText: {
     color: Colors.light.text,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });

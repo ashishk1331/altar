@@ -1,26 +1,7 @@
-import { supabase } from "@/util/supabase";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from 'convex/react';
 
-export type PseudoPostType = {
-  author_id: string;
-  title: string;
-  content: string;
-};
-
-const addPoem = async (data: PseudoPostType) => {
-  return supabase.from("posts").insert([data]);
-};
+import { api } from '@/convex/_generated/api';
 
 export default function useAddPoem() {
-  const queryClient = useQueryClient();
-
-  const mutate = useMutation({
-    mutationKey: ["posts"],
-    mutationFn: addPoem,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-    },
-  });
-
-  return mutate;
+  return useMutation(api.poems.writePoem);
 }

@@ -1,12 +1,12 @@
 // Library
-import { View, StyleSheet } from "react-native";
-import { ArrowLeft } from "iconoir-react-native";
-import { router } from "expo-router";
+import { View, StyleSheet } from 'react-native';
+import { ArrowLeft } from 'iconoir-react-native';
+import { router } from 'expo-router';
 
 // Components
-import { IconButton } from "../Button";
-import Flex from "../Flex";
-import { Headline } from "../Text";
+import { IconButton } from '../Button';
+import Flex from '../Flex';
+import { Headline } from '../Text';
 
 type NavbarProps = {
   title: string;

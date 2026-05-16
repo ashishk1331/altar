@@ -1,11 +1,11 @@
-import { Colors } from "@/constants/Colors";
-import { router } from "expo-router";
-import { Plus } from "iconoir-react-native";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { Colors } from '@/constants/Colors';
+import { router } from 'expo-router';
+import { Plus } from 'iconoir-react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 
 export default function AddPoemButton() {
   function goToEditor() {
-    router.push("/editor");
+    router.push('/editor');
   }
   return (
     <TouchableOpacity
@@ -19,7 +19,7 @@ export default function AddPoemButton() {
 
 const styles = StyleSheet.create({
   container: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 20,
     right: 20,
     padding: 16,

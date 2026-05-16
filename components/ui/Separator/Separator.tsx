@@ -1,5 +1,5 @@
-import { Colors } from "@/constants/Colors";
-import { StyleSheet, View } from "react-native";
+import { Colors } from '@/constants/Colors';
+import { StyleSheet, View } from 'react-native';
 
 export default function Separator() {
   return <View style={styles.line} />;
@@ -7,7 +7,7 @@ export default function Separator() {
 
 const styles = StyleSheet.create({
   line: {
-    width: "100%",
+    width: '100%',
     height: 2,
     backgroundColor: Colors.light.lightGray,
     marginVertical: 10,

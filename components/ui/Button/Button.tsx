@@ -1,10 +1,5 @@
-import { Colors } from "@/constants/Colors";
-import {
-  PressableProps,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { Colors } from '@/constants/Colors';
+import { type PressableProps, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -19,11 +14,15 @@ export default function Button({ children, fill, onPress }: ButtonProps) {
       style={[
         styles.button,
         {
-          width: fill ? "100%" : "auto",
+          width: fill ? '100%' : 'auto',
         },
       ]}
     >
-      <Text style={styles.buttonText}>{children}</Text>
+      {typeof children === 'string' ? (
+        <Text style={styles.buttonText}>{children}</Text>
+      ) : (
+        children
+      )}
     </TouchableOpacity>
   );
 }
@@ -31,8 +30,8 @@ export default function Button({ children, fill, onPress }: ButtonProps) {
 const styles = StyleSheet.create({
   button: {
     backgroundColor: Colors.light.text,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 8,
   },

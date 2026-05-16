@@ -26,3 +26,5 @@ expo-env.d.ts
 # Extra Files
 commands.md
 android
+
+scripts/

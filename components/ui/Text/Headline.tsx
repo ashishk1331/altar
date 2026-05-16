@@ -1,6 +1,6 @@
-import { Text, StyleSheet } from "react-native";
-import { Colors } from "@/constants/Colors";
-import React from "react";
+import { Text, StyleSheet } from 'react-native';
+import { Colors } from '@/constants/Colors';
+import type React from 'react';
 
 type HeadlineProps = {
   children: React.ReactNode;
@@ -31,9 +31,9 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
     fontSize: 17,
     lineHeight: 22,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   italic: {
-    fontStyle: "italic",
+    fontStyle: 'italic',
   },
 });

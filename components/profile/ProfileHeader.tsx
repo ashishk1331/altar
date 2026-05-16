@@ -1,56 +1,57 @@
-// Library
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { router } from "expo-router";
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { router } from 'expo-router';
 
-// Components
-import Flex from "../ui/Flex";
-import { Caption, Paragraph } from "../ui/Text";
-import useFetchUser from "@/hooks/useFetchUser";
-import { emailToName } from "@/util/handy";
-import Avatar from "../ui/Avatar";
+import Flex from '../ui/Flex';
+import { Caption, Paragraph } from '../ui/Text';
+import Avatar from '../ui/Avatar';
+
+import type { Id } from '@/convex/_generated/dataModel';
+import useFetchUser from '@/hooks/useFetchUser';
+import { useSession } from '@/wrapper/SessionWrapper';
 
 type ProfileHeaderProps = {
   isAtProfilePage?: boolean;
-  id?: string;
+  id: Id<'users'>;
 };
 
-export default function ProfileHeader({
-  isAtProfilePage = false,
-  id,
-}: ProfileHeaderProps) {
-  const { isPending, data } = useFetchUser(id ?? "");
+export default function ProfileHeader({ isAtProfilePage = false, id }: ProfileHeaderProps) {
+  const { user: viewer } = useSession();
+  const { user, isPending } = useFetchUser(id, viewer?._id);
+
   function jumpToFollowers(isFollowerList: boolean) {
-    router.push(`/profile/user-list?isFollowerList=${isFollowerList}`);
+    router.push(`/profile/user-list?userId=${id}&isFollowerList=${isFollowerList}`);
   }
 
-  if (isPending && !data) {
+  if (isPending || !user) {
     return null;
   }
+
+  const name = user.name || user.firstName || 'anonymous';
 
   return (
     <View style={styles.container}>
       <Flex gap={16}>
-        <Avatar width={120} name={emailToName(data?.data?.name || "Maya")} />
+        <Avatar width={120} name={name} src={user.picture || undefined} />
         <Flex direction="column" justify="space-between">
-          <Paragraph>{emailToName(data?.data?.name || "Maya")}</Paragraph>
-          {data?.data && <Caption>{data.data.bio}</Caption>}
+          <Paragraph>{name}</Paragraph>
+          {user.bio ? <Caption>{user.bio}</Caption> : null}
 
           <View style={styles.bar}>
             <Flex justify="space-between" gap={24}>
               {isAtProfilePage ? (
                 <TouchableOpacity onPress={() => jumpToFollowers(true)}>
-                  <Caption>{data?.data?.followers} followers</Caption>
+                  <Caption>{user.followerCount} followers</Caption>
                 </TouchableOpacity>
               ) : (
-                <Caption>{data?.data?.followers} followers</Caption>
+                <Caption>{user.followerCount} followers</Caption>
               )}
 
               {isAtProfilePage ? (
                 <TouchableOpacity onPress={() => jumpToFollowers(false)}>
-                  <Caption>{data?.data?.following} following</Caption>
+                  <Caption>{user.followingCount} following</Caption>
                 </TouchableOpacity>
               ) : (
-                <Caption>{data?.data?.following} following</Caption>
+                <Caption>{user.followingCount} following</Caption>
               )}
             </Flex>
           </View>

@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { router } from 'expo-router';
 
 export function jumpToProfile(id: string) {
   router.push(`/user/${id}`);
@@ -9,5 +9,5 @@ export function jumpToPost(id: string) {
 }
 
 export function jumpToHome() {
-  router.replace("/home");
+  router.replace('/home');
 }
