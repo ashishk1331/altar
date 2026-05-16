@@ -4,18 +4,17 @@ import Navbar from '@/components/ui/Navbar';
 import Post from '@/components/Post';
 import Separator from '@/components/ui/Separator';
 
-import type { Id } from '@/convex/_generated/dataModel';
 import useFetchDraftsByUser from '@/hooks/useFetchDraftsByUser';
 import { useSession } from '@/wrapper/SessionWrapper';
 
 export default function Drafts() {
   const { user } = useSession();
   if (!user) return null;
-  return <DraftsList userId={user._id} />;
+  return <DraftsList />;
 }
 
-function DraftsList({ userId }: { userId: Id<'users'> }) {
-  const { posts, isPending, canLoadMore, loadMore } = useFetchDraftsByUser(userId);
+function DraftsList() {
+  const { posts, isPending, canLoadMore, loadMore } = useFetchDraftsByUser();
 
   return (
     <View style={[styles.container, styles.outer]}>

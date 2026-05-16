@@ -48,7 +48,7 @@ function EditProfileForm({ userId }: { userId: Id<'users'> }) {
     setIsSuccess(false);
     try {
       setIsSaving(true);
-      await updateUser({ userId, firstName, lastName, bio });
+      await updateUser({ firstName, lastName, bio });
       patchLocalUser({ firstName, lastName, bio });
       setIsSuccess(true);
     } catch (err) {

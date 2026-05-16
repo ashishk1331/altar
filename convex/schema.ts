@@ -34,7 +34,10 @@ export default defineSchema({
     followerCount: v.number(),
     followingCount: v.number(),
     postCount: v.number(),
-  }).index('by_email', ['email']),
+    googleId: v.optional(v.string()),
+  })
+    .index('by_email', ['email'])
+    .index('by_google_id', ['googleId']),
 
   followers: defineTable({
     followee: v.id('users'),

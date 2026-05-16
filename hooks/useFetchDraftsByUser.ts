@@ -1,12 +1,13 @@
 import { usePaginatedQuery } from 'convex/react';
 
 import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useSession } from '@/wrapper/SessionWrapper';
 
-export default function useFetchDraftsByUser(userId: Id<'users'>) {
+export default function useFetchDraftsByUser() {
+  const { user } = useSession();
   const { results, status, loadMore } = usePaginatedQuery(
     api.poems.readDraftPoems,
-    { userId },
+    user ? {} : 'skip',
     { initialNumItems: 12 }
   );
 

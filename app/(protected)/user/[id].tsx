@@ -38,9 +38,9 @@ export default function Profile() {
   function handleFollow() {
     if (!viewer || !author) return;
     if (author.isFollowing) {
-      unfollow({ followee: authorId, follower: viewer._id });
+      unfollow({ followee: authorId });
     } else {
-      follow({ followee: authorId, follower: viewer._id });
+      follow({ followee: authorId });
     }
   }
 

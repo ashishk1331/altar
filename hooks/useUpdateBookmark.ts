@@ -8,18 +8,16 @@ export default function useUpdateBookmark() {
   const remove = useMutation(api.bookmarks.removeBookmark);
 
   return async function toggle({
-    authorId,
     poemId,
     isBookmarked,
   }: {
-    authorId: Id<'users'>;
     poemId: Id<'poems'>;
     isBookmarked: boolean;
   }) {
     if (isBookmarked) {
-      await remove({ authorId, poemId });
+      await remove({ poemId });
     } else {
-      await add({ authorId, poemId });
+      await add({ poemId });
     }
   };
 }

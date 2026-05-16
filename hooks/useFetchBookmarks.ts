@@ -1,12 +1,13 @@
 import { usePaginatedQuery } from 'convex/react';
 
 import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useSession } from '@/wrapper/SessionWrapper';
 
-export default function useFetchBookmarks(userId: Id<'users'>) {
+export default function useFetchBookmarks() {
+  const { user } = useSession();
   const { results, status, loadMore } = usePaginatedQuery(
     api.bookmarks.readBookmarkedPoems,
-    { userId },
+    user ? {} : 'skip',
     { initialNumItems: 12 }
   );
 

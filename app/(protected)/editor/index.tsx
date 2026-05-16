@@ -32,7 +32,6 @@ export default function AddPoem() {
       await writePoem({
         title,
         body,
-        authorId: user._id,
         isDraft: false,
       });
       jumpToHome();

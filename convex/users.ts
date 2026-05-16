@@ -2,37 +2,55 @@ import { ConvexError, v } from 'convex/values';
 import type { Doc } from './_generated/dataModel';
 import { query } from './_generated/server';
 import { mutation } from './functions';
+import { getCurrentUserOrThrow } from './authHelpers';
 
 export const upsertUser = mutation({
-  args: {
-    email: v.string(),
-    name: v.string(),
-    firstName: v.string(),
-    lastName: v.string(),
-    picture: v.string(),
-  },
-  handler: async (ctx, args) => {
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError({ message: 'Not authenticated.', code: 401 });
+    }
+    if (!identity.email) {
+      throw new ConvexError({ message: 'Google identity missing email.', code: 400 });
+    }
+
+    const googleId = identity.subject;
+    const email = identity.email;
+    const firstName = identity.givenName ?? '';
+    const lastName = identity.familyName ?? '';
+    const name = identity.name ?? (`${firstName} ${lastName}`.trim() || email);
+    const picture = identity.pictureUrl ?? '';
+
+    const byGoogleId = await ctx.db
+      .query('users')
+      .withIndex('by_google_id', (q) => q.eq('googleId', googleId))
+      .first();
+    if (byGoogleId) return byGoogleId;
+
+    const byEmail = await ctx.db
+      .query('users')
+      .withIndex('by_email', (q) => q.eq('email', email))
+      .first();
+    if (byEmail) {
+      await ctx.db.patch(byEmail._id, { googleId });
+      return { ...byEmail, googleId };
+    }
+
     const user = {
-      email: args.email,
-      name: args.name,
-      firstName: args.firstName,
-      lastName: args.lastName,
-      picture: args.picture,
+      email,
+      name,
+      firstName,
+      lastName,
+      picture,
       bio: '',
       followerCount: 0,
       followingCount: 0,
       postCount: 0,
+      googleId,
     };
-    const existing = await ctx.db
-      .query('users')
-      .withIndex('by_email', (q) => q.eq('email', args.email))
-      .first();
-
-    if (!existing) {
-      const Id = await ctx.db.insert('users', user);
-      return { _id: Id, _creationTime: Date.now(), ...user };
-    }
-    return existing;
+    const Id = await ctx.db.insert('users', user);
+    return { _id: Id, _creationTime: Date.now(), ...user };
   },
 });
 
@@ -64,24 +82,18 @@ export const readUser = query({
 
 export const updateUser = mutation({
   args: {
-    userId: v.id('users'),
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
     bio: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const user = await getCurrentUserOrThrow(ctx);
     const payload: Partial<Doc<'users'>> = {};
 
-    if (args.firstName) {
-      payload.firstName = args.firstName;
-    }
-    if (args.lastName) {
-      payload.lastName = args.lastName;
-    }
-    if (args.bio) {
-      payload.bio = args.bio;
-    }
+    if (args.firstName !== undefined) payload.firstName = args.firstName;
+    if (args.lastName !== undefined) payload.lastName = args.lastName;
+    if (args.bio !== undefined) payload.bio = args.bio;
 
-    await ctx.db.patch(args.userId, payload);
+    await ctx.db.patch(user._id, payload);
   },
 });

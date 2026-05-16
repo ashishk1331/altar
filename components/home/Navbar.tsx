@@ -14,10 +14,7 @@ import { useSession } from '@/wrapper/SessionWrapper';
 
 export default function Navbar() {
   const { user } = useSession();
-  const unreadCount = useQuery(
-    api.notifications.getUnreadCount,
-    user ? { userId: user._id } : 'skip'
-  );
+  const unreadCount = useQuery(api.notifications.getUnreadCount, user ? {} : 'skip');
 
   function goToProfile() {
     router.push('/profile');

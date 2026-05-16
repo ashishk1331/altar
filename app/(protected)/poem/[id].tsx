@@ -48,7 +48,6 @@ export default function Poem() {
   function handleBookmark() {
     if (!user || !post) return;
     toggleBookmark({
-      authorId: user._id,
       poemId: post._id,
       isBookmarked: post.isBookmarked,
     });
@@ -56,11 +55,7 @@ export default function Poem() {
 
   function handleLike() {
     if (!user || !post?.author) return;
-    const args = {
-      authorId: user._id,
-      poemId: post._id,
-      poemAuthorId: post.author._id,
-    };
+    const args = { poemId: post._id };
     if (post.isLiked) {
       dislikePoem(args);
     } else {

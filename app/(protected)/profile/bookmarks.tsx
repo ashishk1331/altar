@@ -4,18 +4,17 @@ import Navbar from '@/components/ui/Navbar';
 import Post from '@/components/Post';
 import Separator from '@/components/ui/Separator';
 
-import type { Id } from '@/convex/_generated/dataModel';
 import useFetchBookmarks from '@/hooks/useFetchBookmarks';
 import { useSession } from '@/wrapper/SessionWrapper';
 
 export default function Bookmarks() {
   const { user } = useSession();
   if (!user) return null;
-  return <BookmarksList userId={user._id} />;
+  return <BookmarksList />;
 }
 
-function BookmarksList({ userId }: { userId: Id<'users'> }) {
-  const { posts, isPending, canLoadMore, loadMore } = useFetchBookmarks(userId);
+function BookmarksList() {
+  const { posts, isPending, canLoadMore, loadMore } = useFetchBookmarks();
 
   return (
     <View style={[styles.container, styles.outer]}>

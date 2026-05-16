@@ -1,17 +1,16 @@
 import { query } from './_generated/server';
-import { v } from 'convex/values';
+import { ConvexError, v } from 'convex/values';
 import { paginationOptsValidator } from 'convex/server';
 import { internalMutation, mutation } from './functions';
+import { getCurrentUserOrThrow } from './authHelpers';
 
 export const readNotifications = query({
-  args: {
-    userId: v.id('users'),
-    paginationOpts: paginationOptsValidator,
-  },
+  args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
+    const user = await getCurrentUserOrThrow(ctx);
     const paginatedNotifications = await ctx.db
       .query('notifications')
-      .withIndex('by_author', (q) => q.eq('authorId', args.userId))
+      .withIndex('by_author', (q) => q.eq('authorId', user._id))
       .order('desc')
       .paginate(args.paginationOpts);
 
@@ -38,13 +37,12 @@ export const readNotifications = query({
 });
 
 export const getUnreadCount = query({
-  args: {
-    userId: v.id('users'),
-  },
-  handler: async (ctx, args) => {
+  args: {},
+  handler: async (ctx) => {
+    const user = await getCurrentUserOrThrow(ctx);
     const unreadNotifications = await ctx.db
       .query('notifications')
-      .withIndex('by_author_and_read', (q) => q.eq('authorId', args.userId).eq('read', false))
+      .withIndex('by_author_and_read', (q) => q.eq('authorId', user._id).eq('read', false))
       .collect();
 
     return unreadNotifications.length;
@@ -52,22 +50,25 @@ export const getUnreadCount = query({
 });
 
 export const markAsRead = mutation({
-  args: {
-    notificationId: v.id('notifications'),
-  },
+  args: { notificationId: v.id('notifications') },
   handler: async (ctx, args) => {
+    const user = await getCurrentUserOrThrow(ctx);
+    const notification = await ctx.db.get(args.notificationId);
+    if (!notification) throw new ConvexError({ message: 'Notification not found.', code: 404 });
+    if (notification.authorId !== user._id) {
+      throw new ConvexError({ message: 'Not allowed.', code: 403 });
+    }
     await ctx.db.patch(args.notificationId, { read: true });
   },
 });
 
 export const markAllAsRead = mutation({
-  args: {
-    userId: v.id('users'),
-  },
-  handler: async (ctx, args) => {
+  args: {},
+  handler: async (ctx) => {
+    const user = await getCurrentUserOrThrow(ctx);
     const unreadNotifications = await ctx.db
       .query('notifications')
-      .withIndex('by_author_and_read', (q) => q.eq('authorId', args.userId).eq('read', false))
+      .withIndex('by_author_and_read', (q) => q.eq('authorId', user._id).eq('read', false))
       .collect();
 
     await Promise.all(
@@ -81,13 +82,11 @@ export const deleteOldNotifications = internalMutation({
   handler: async (ctx, args) => {
     const cutoffDate = new Date(Date.now() - args.daysOld * 24 * 60 * 60 * 1000);
 
-    // Query notifications older than cutoff date
     const oldNotifications = await ctx.db
       .query('notifications')
       .filter((q) => q.lt(q.field('_creationTime'), cutoffDate.getTime()))
       .collect();
 
-    // Delete them
     for (const notification of oldNotifications) {
       await ctx.db.delete(notification._id);
     }

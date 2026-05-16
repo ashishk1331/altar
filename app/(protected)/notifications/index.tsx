@@ -19,7 +19,7 @@ export default function Notifications() {
   const { user } = useSession();
   const { results, status, loadMore } = usePaginatedQuery(
     api.notifications.readNotifications,
-    user ? { userId: user._id } : 'skip',
+    user ? {} : 'skip',
     { initialNumItems: 20 }
   );
   const markAsRead = useMutation(api.notifications.markAsRead);
@@ -38,7 +38,7 @@ export default function Notifications() {
       <Navbar
         title="Notifications"
         right={
-          user && <Button onPress={() => markAllAsRead({ userId: user._id })}>Mark all read</Button>
+          user && <Button onPress={() => markAllAsRead({})}>Mark all read</Button>
         }
       />
       {isPending ? (

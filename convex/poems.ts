@@ -1,7 +1,8 @@
-import { v } from 'convex/values';
+import { ConvexError, v } from 'convex/values';
 import { query } from './_generated/server';
 import { paginationOptsValidator } from 'convex/server';
 import { mutation } from './functions';
+import { getCurrentUserOrThrow } from './authHelpers';
 
 export const readAPoem = query({
   args: { poemId: v.id('poems'), userId: v.optional(v.id('users')) },
@@ -151,14 +152,12 @@ export const readPoemsByAuthor = query({
 });
 
 export const readDraftPoems = query({
-  args: {
-    paginationOpts: paginationOptsValidator,
-    userId: v.id('users'),
-  },
+  args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
+    const user = await getCurrentUserOrThrow(ctx);
     const paginatedPoems = await ctx.db
       .query('poems')
-      .withIndex('by_author_and_is_draft', (q) => q.eq('authorId', args.userId).eq('isDraft', true))
+      .withIndex('by_author_and_is_draft', (q) => q.eq('authorId', user._id).eq('isDraft', true))
       .order('desc')
       .paginate(args.paginationOpts);
 
@@ -183,34 +182,46 @@ export const writePoem = mutation({
   args: {
     title: v.string(),
     body: v.string(),
-    authorId: v.id('users'),
     isDraft: v.boolean(),
     poemId: v.optional(v.id('poems')),
   },
   handler: async (ctx, args) => {
+    const user = await getCurrentUserOrThrow(ctx);
     if (args.poemId) {
+      const existing = await ctx.db.get(args.poemId);
+      if (!existing) throw new ConvexError({ message: 'Poem not found.', code: 404 });
+      if (existing.authorId !== user._id) {
+        throw new ConvexError({ message: 'Not allowed to edit this poem.', code: 403 });
+      }
       await ctx.db.patch(args.poemId, {
         title: args.title,
         body: args.body,
         isDraft: args.isDraft,
       });
       return 'Document updated';
-    } else {
-      return await ctx.db.insert('poems', {
-        title: args.title,
-        body: args.body,
-        authorId: args.authorId,
-        likeCount: 0,
-        commentCount: 0,
-        isDraft: args.isDraft,
-      });
     }
+    return await ctx.db.insert('poems', {
+      title: args.title,
+      body: args.body,
+      authorId: user._id,
+      likeCount: 0,
+      commentCount: 0,
+      isDraft: args.isDraft,
+    });
   },
 });
 
 export const deletePoem = mutation({
   args: { poemId: v.id('poems') },
-  handler: async (ctx, args) => await ctx.db.delete(args.poemId),
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserOrThrow(ctx);
+    const poem = await ctx.db.get(args.poemId);
+    if (!poem) throw new ConvexError({ message: 'Poem not found.', code: 404 });
+    if (poem.authorId !== user._id) {
+      throw new ConvexError({ message: 'Not allowed to delete this poem.', code: 403 });
+    }
+    await ctx.db.delete(args.poemId);
+  },
 });
 
 export const searchPoem = query({

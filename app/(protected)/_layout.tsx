@@ -12,6 +12,7 @@ export default function AppLayout() {
       style={{
         flex: 1,
         paddingTop: insets.top,
+        paddingBottom: insets.bottom,
         backgroundColor: Colors.light.background,
       }}
     >
